@@ -8,7 +8,9 @@ const CACHE_NAME = 'meal-picker-v1';
 const APP_ASSETS = [
   './',
   './index.html',
-  './manifest.json'
+  './manifest.json',
+  './icon-192x192.png',
+  './icon-512x512.png'
 ];
 
 /** Install: pre-cache app shell */

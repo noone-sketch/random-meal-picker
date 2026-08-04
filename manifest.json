@@ -2,8 +2,11 @@
   "name": "随机干饭选择器",
   "short_name": "干饭选择器",
   "description": "今天吃什么？让运气帮你决定！随机抽取食堂或外卖，告别选择困难。",
-  "start_url": ".",
+  "id": "/random-meal-picker/",
+  "start_url": "/random-meal-picker/",
+  "scope": "/random-meal-picker/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait",
   "background_color": "#FFFBF5",
   "theme_color": "#FF6B4A",
@@ -22,7 +25,7 @@
       "purpose": "any"
     },
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23FF6B4A'/><text x='50' y='68' font-size='56' text-anchor='middle' dominant-baseline='middle'>🍚</text></svg>",
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxMDAgMTAwJz48cmVjdCB3aWR0aD0nMTAwJyBoZWlnaHQ9JzEwMCcgcng9JzIwJyBmaWxsPScjRkY2QjRBJy8+PHRleHQgeD0nNTAnIHk9JzY4JyBmb250LXNpemU9JzU2JyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBkb21pbmFudC1iYXNlbGluZT0nbWlkZGxlJz7wn42aPC90ZXh0Pjwvc3ZnPg==",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "maskable"
