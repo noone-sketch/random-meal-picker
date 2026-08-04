@@ -284,10 +284,10 @@
       flex: 1;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      grid-template-rows: 1fr 1fr 1fr;
+      grid-auto-rows: minmax(100px, 1fr);
       gap: 12px;
       padding-top: 8px;
-      align-content: center;
+      align-content: start;
     }
 
     .cafeteria-grid .cafe-card {
@@ -308,11 +308,6 @@
       transform: scale(0.95);
     }
 
-    /* Last card spans full width */
-    .cafeteria-grid .cafe-card:nth-child(5) {
-      grid-column: 1 / -1;
-    }
-
     .cafe-card .cafe-emoji { font-size: 28px; }
     .cafe-card .cafe-name {
       font-size: 16px;
@@ -324,12 +319,43 @@
       opacity: 0.7;
     }
 
-    /* Cafeteria-specific styles */
-    .cafe-card.c1 { background: var(--c1-light); color: #D46540; }
-    .cafe-card.c2 { background: var(--c2-light); color: #4A8FA3; }
-    .cafe-card.c3 { background: var(--c3-light); color: #3D8F50; }
-    .cafe-card.c4 { background: var(--c4-light); color: #7B6B9E; }
-    .cafe-card.c5 { background: var(--c5-light); color: #B8932E; }
+    /* Add-canteen card (dashed placeholder) */
+    .cafeteria-grid .cafe-card.add-card {
+      background: var(--bg);
+      border: 2px dashed var(--border);
+      color: var(--text-muted);
+      opacity: 0.8;
+    }
+    .cafeteria-grid .cafe-card.add-card:active {
+      background: var(--border-light);
+    }
+
+    /* Delete overlay for canteen cards in edit mode */
+    .cafe-card .canteen-del {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: none;
+      background: var(--danger);
+      color: #FFF;
+      font-size: 14px;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      line-height: 1;
+      box-shadow: 0 2px 6px rgba(224,85,85,0.3);
+    }
+    .cafe-card.editing .canteen-del {
+      display: flex;
+    }
+    .cafe-card.editing .canteen-del:active {
+      background: #C04040;
+    }
 
     /* ============================================================
        BACK BUTTON
@@ -707,6 +733,91 @@
     }
     .btn-add:active { background: var(--primary-dark); }
 
+    /* Canteen management list (inside modal body) */
+    .canteen-mgr-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+      transition: background 0.2s;
+    }
+    .canteen-mgr-item .canteen-mgr-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .canteen-mgr-item .canteen-mgr-emoji {
+      font-size: 24px;
+      width: 36px;
+      text-align: center;
+    }
+    .canteen-mgr-item .canteen-mgr-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .canteen-mgr-item .canteen-mgr-count {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    .canteen-mgr-item .canteen-mgr-del {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .canteen-mgr-item .canteen-mgr-del:active {
+      background: #FFE8E8;
+      color: var(--danger);
+    }
+
+    /* Canteen add row */
+    .canteen-add-row {
+      display: flex;
+      gap: 8px;
+      padding-top: 4px;
+    }
+    .canteen-add-row input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-full);
+      font-family: var(--font);
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      outline: none;
+      background: var(--bg);
+      transition: border-color 0.2s;
+    }
+    .canteen-add-row input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-light);
+    }
+    .canteen-add-row input:focus:not(:focus-visible) {
+      box-shadow: none;
+    }
+    .canteen-add-row input:focus-visible {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-light);
+    }
+    .canteen-add-row input::placeholder {
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
     /* Modal footer */
     .modal-footer {
       flex-shrink: 0;
@@ -834,7 +945,7 @@
         <div class="choice-card cafeteria" id="btn-cafeteria">
           <span class="card-emoji">🍽️</span>
           <span class="card-title">去食堂吃饭</span>
-          <span class="card-desc">一饭 · 二饭 · 三饭 · 四饭 · 南亭</span>
+          <span class="card-desc" id="home-cafeteria-desc"></span>
         </div>
         <div class="choice-card delivery" id="btn-delivery">
           <span class="card-emoji">🥡</span>
@@ -844,6 +955,7 @@
       </div>
       <div class="home-footer">
         <button id="btn-manage">📋 管理菜单</button>
+        <button id="btn-manage-canteens-home">🏫 管理食堂</button>
       </div>
     </div>
 
@@ -857,32 +969,8 @@
         </button>
         <span class="screen-title">选择食堂</span>
       </div>
-      <div class="cafeteria-grid">
-        <div class="cafe-card c1" data-canteen="一饭">
-          <span class="cafe-emoji">🍜</span>
-          <span class="cafe-name">一饭</span>
-          <span class="cafe-count" data-count="一饭">0道菜</span>
-        </div>
-        <div class="cafe-card c2" data-canteen="二饭">
-          <span class="cafe-emoji">🍛</span>
-          <span class="cafe-name">二饭</span>
-          <span class="cafe-count" data-count="二饭">0道菜</span>
-        </div>
-        <div class="cafe-card c3" data-canteen="三饭">
-          <span class="cafe-emoji">🍖</span>
-          <span class="cafe-name">三饭</span>
-          <span class="cafe-count" data-count="三饭">0道菜</span>
-        </div>
-        <div class="cafe-card c4" data-canteen="四饭">
-          <span class="cafe-emoji">🍲</span>
-          <span class="cafe-name">四饭</span>
-          <span class="cafe-count" data-count="四饭">0道菜</span>
-        </div>
-        <div class="cafe-card c5" data-canteen="南亭">
-          <span class="cafe-emoji">🥘</span>
-          <span class="cafe-name">南亭</span>
-          <span class="cafe-count" data-count="南亭">0道菜</span>
-        </div>
+      <div class="cafeteria-grid" id="cafeteria-grid">
+        <!-- Dynamically rendered -->
       </div>
     </div>
 
@@ -920,19 +1008,15 @@
         <button class="modal-close" id="modal-close" aria-label="关闭">✕</button>
       </div>
       <div class="modal-tabs" id="modal-tabs">
-        <button class="modal-tab active" data-tab="一饭">🍜 一饭</button>
-        <button class="modal-tab" data-tab="二饭">🍛 二饭</button>
-        <button class="modal-tab" data-tab="三饭">🍖 三饭</button>
-        <button class="modal-tab" data-tab="四饭">🍲 四饭</button>
-        <button class="modal-tab" data-tab="南亭">🥘 南亭</button>
-        <button class="modal-tab" data-tab="外卖">🥡 外卖</button>
+        <!-- Dynamically rendered -->
       </div>
       <div class="modal-body" id="modal-body">
         <!-- Dynamically filled -->
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer" id="modal-footer-dishes">
         <button class="btn btn-danger" id="btn-clear-menu">🗑️ 清空当前菜单</button>
       </div>
+      <div class="modal-footer" id="modal-footer-canteens" style="display:none;"></div>
     </div>
   </div>
 
@@ -956,8 +1040,12 @@
     // ============================================================
     // CONSTANTS
     // ============================================================
-    const MENU_KEYS = ['一饭', '二饭', '三饭', '四饭', '南亭', '外卖'];
+    const DELIVERY_KEY = '外卖';
     const STORAGE_KEY = 'random_meal_picker_menus';
+    const CANTEEN_STORAGE_KEY = 'random_meal_picker_canteens';
+
+    // Default canteens (excludes delivery which is always present)
+    const DEFAULT_CANTEENS = ['一饭', '二饭', '三饭', '四饭', '南亭'];
 
     // Default dishes for first-time users
     const DEFAULT_MENUS = {
@@ -969,10 +1057,93 @@
       '外卖': ['麦当劳', '肯德基', '必胜客', '汉堡王', '杨国福麻辣烫', '正新鸡排', '沙县小吃', '螺蛳粉', '华莱士']
     };
 
+    // Color palette for canteens (cycled through for dynamic canteens)
+    var CANTEEN_PALETTE = [
+      { bg: '#FFF3EE', color: '#D46540', emoji: '🍜' },
+      { bg: '#EEF8FB', color: '#4A8FA3', emoji: '🍛' },
+      { bg: '#EEFAF0', color: '#3D8F50', emoji: '🍖' },
+      { bg: '#F5F2FA', color: '#7B6B9E', emoji: '🍲' },
+      { bg: '#FEFAEC', color: '#B8932E', emoji: '🥘' },
+      { bg: '#FFF0EB', color: '#E87830', emoji: '🍝' },
+      { bg: '#E8F8F5', color: '#1ABC9C', emoji: '🍱' },
+      { bg: '#FDEBD0', color: '#E67E22', emoji: '🍗' },
+      { bg: '#E8F0FE', color: '#4A90D9', emoji: '🥗' },
+      { bg: '#FCE4EC', color: '#E91E63', emoji: '🧆' }
+    ];
+
+    /** Get all menu keys — canteens + delivery (always last) */
+    function getMenuKeys() {
+      return Data.getCanteens().concat([DELIVERY_KEY]);
+    }
+
+    /** Get palette entry for a canteen by its index */
+    function getCanteenPalette(index) {
+      return CANTEEN_PALETTE[index % CANTEEN_PALETTE.length];
+    }
+
     // ============================================================
     // DATA LAYER — LocalStorage CRUD
     // ============================================================
     const Data = {
+      // ---- Canteen list management ----
+
+      /** Get the canteen list, falling back to defaults */
+      getCanteens() {
+        try {
+          const raw = localStorage.getItem(CANTEEN_STORAGE_KEY);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed) && parsed.length > 0 &&
+                parsed.every(function(item) { return typeof item === 'string' && item.trim(); })) {
+              return parsed;
+            }
+          }
+        } catch (e) { /* fall through */ }
+        // First time: save and return defaults
+        Data.saveCanteens(DEFAULT_CANTEENS);
+        return DEFAULT_CANTEENS.slice();
+      },
+
+      saveCanteens(arr) {
+        try {
+          localStorage.setItem(CANTEEN_STORAGE_KEY, JSON.stringify(arr));
+        } catch (e) {
+          console.warn('Canteen storage write failed:', e);
+          UI.toast('⚠️ 存储空间不足');
+        }
+      },
+
+      /** Add a new canteen. Returns true on success, false if duplicate/exists. */
+      addCanteen(name) {
+        var canteens = Data.getCanteens();
+        if (canteens.indexOf(name) !== -1) return false; // already exists
+        if (name === DELIVERY_KEY) return false;          // reserved
+        canteens.push(name);
+        Data.saveCanteens(canteens);
+        // Ensure menu entry exists
+        var menus = Data.getAll();
+        if (!menus[name]) {
+          menus[name] = [];
+          Data.saveAll(menus);
+        }
+        return true;
+      },
+
+      /** Delete a canteen and its menu. Returns false if it doesn't exist. */
+      deleteCanteen(name) {
+        var canteens = Data.getCanteens();
+        var idx = canteens.indexOf(name);
+        if (idx === -1) return false;
+        canteens.splice(idx, 1);
+        Data.saveCanteens(canteens);
+        // Remove its menu data
+        var menus = Data.getAll();
+        delete menus[name];
+        Data.saveAll(menus);
+        return true;
+      },
+
+      // ---- Menu CRUD ----
       /** Get all menus from LocalStorage, falling back to defaults */
       getAll() {
         try {
@@ -983,11 +1154,15 @@
             if (typeof parsed === 'object' && parsed !== null) {
               // Merge with defaults only for missing keys (not empty ones)
               const merged = {};
-              for (const key of MENU_KEYS) {
+              const allKeys = getMenuKeys();
+              for (var i = 0; i < allKeys.length; i++) {
+                var key = allKeys[i];
                 if (key in parsed && Array.isArray(parsed[key])) {
                   merged[key] = parsed[key];                  // preserve user data (including empty)
+                } else if (DEFAULT_MENUS[key]) {
+                  merged[key] = DEFAULT_MENUS[key].slice();   // fill missing key with defaults
                 } else {
-                  merged[key] = [...DEFAULT_MENUS[key]];      // fill missing key with defaults
+                  merged[key] = [];                           // new canteen — empty menu
                 }
               }
               return merged;
@@ -997,9 +1172,11 @@
           console.warn('LocalStorage read failed, using defaults:', e);
         }
         // First time: save and return fresh clone of defaults
-        const defaults = {};
-        for (const key of MENU_KEYS) {
-          defaults[key] = [...DEFAULT_MENUS[key]];
+        var defaults = {};
+        var allKeys = getMenuKeys();
+        for (var i = 0; i < allKeys.length; i++) {
+          var k = allKeys[i];
+          defaults[k] = DEFAULT_MENUS[k] ? DEFAULT_MENUS[k].slice() : [];
         }
         Data.saveAll(defaults);
         return defaults;
@@ -1056,9 +1233,11 @@
 
       /** Reset all menus to defaults */
       resetAll() {
-        const defaults = {};
-        for (const key of MENU_KEYS) {
-          defaults[key] = [...DEFAULT_MENUS[key]];
+        var defaults = {};
+        var allKeys = getMenuKeys();
+        for (var i = 0; i < allKeys.length; i++) {
+          var k = allKeys[i];
+          defaults[k] = DEFAULT_MENUS[k] ? DEFAULT_MENUS[k].slice() : [];
         }
         Data.saveAll(defaults);
       },
@@ -1066,12 +1245,15 @@
       /** Import dishes from a JSON file */
       import(jsonData) {
         try {
-          const imported = typeof jsonData === 'string' ? JSON.parse(jsonData) : jsonData;
-          const menus = Data.getAll();
-          for (const key of MENU_KEYS) {
+          var imported = typeof jsonData === 'string' ? JSON.parse(jsonData) : jsonData;
+          var menus = Data.getAll();
+          var allKeys = getMenuKeys();
+          for (var i = 0; i < allKeys.length; i++) {
+            var key = allKeys[i];
             if (Array.isArray(imported[key])) {
-              for (const dish of imported[key]) {
-                if (typeof dish === 'string' && dish.trim() && !menus[key].includes(dish.trim())) {
+              for (var j = 0; j < imported[key].length; j++) {
+                var dish = imported[key][j];
+                if (typeof dish === 'string' && dish.trim() && menus[key].indexOf(dish.trim()) === -1) {
                   menus[key].push(dish.trim());
                 }
               }
@@ -1090,16 +1272,25 @@
     // ============================================================
     const UI = {
       currentScreen: 'home',
+      _historyNav: false,   // true when navigating via browser back
       /** State for the result screen */
       resultState: { source: null, sourceName: null },
 
-      /** Switch to a screen */
+      /** Switch to a screen. Pushes browser history for back-button support. */
       showScreen(name) {
+        if (name === UI.currentScreen) return;
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         const target = document.getElementById('screen-' + name);
         if (target) {
           target.classList.add('active');
+          // Push history for forward navigation; skip when going back via popstate
+          if (!UI._historyNav) {
+            history.pushState({ screen: name }, '', '');
+          }
+          UI._historyNav = false;
           UI.currentScreen = name;
+          // Refresh cafeteria counts when returning to that screen
+          if (name === 'cafeteria') UI.updateCafeteriaCounts();
         }
       },
 
@@ -1120,12 +1311,67 @@
         UI.showScreen('result');
       },
 
+      /** Render the cafeteria grid dynamically */
+      renderCafeteriaGrid() {
+        var grid = document.getElementById('cafeteria-grid');
+        if (!grid) return;
+        var canteens = Data.getCanteens();
+        var html = '';
+        for (var i = 0; i < canteens.length; i++) {
+          var c = canteens[i];
+          var palette = getCanteenPalette(i);
+          var menu = Data.get(c);
+          // Last card spans full width if odd count
+          var spanStyle = (i === canteens.length - 1 && canteens.length % 2 === 1)
+            ? 'grid-column: 1 / -1;' : '';
+          html += '<div class="cafe-card" data-canteen="' + Management.escapeHtml(c) + '" ' +
+            'style="background:' + palette.bg + ';color:' + palette.color + ';' + spanStyle + '">' +
+            '<span class="cafe-emoji">' + palette.emoji + '</span>' +
+            '<span class="cafe-name">' + Management.escapeHtml(c) + '</span>' +
+            '<span class="cafe-count">' + menu.length + '道菜</span>' +
+            '</div>';
+        }
+        grid.innerHTML = html;
+        UI.updateHomeDesc();
+      },
+
+      /** Render modal tabs dynamically */
+      renderModalTabs() {
+        var tabsContainer = document.getElementById('modal-tabs');
+        if (!tabsContainer) return;
+        var canteens = Data.getCanteens();
+        var html = '';
+        for (var i = 0; i < canteens.length; i++) {
+          var c = canteens[i];
+          var palette = getCanteenPalette(i);
+          var active = (c === Management.currentTab) ? ' active' : '';
+          html += '<button class="modal-tab' + active + '" data-tab="' +
+            Management.escapeHtml(c) + '">' + palette.emoji + ' ' +
+            Management.escapeHtml(c) + '</button>';
+        }
+        // Delivery tab (always present, always last)
+        var delActive = (Management.currentTab === DELIVERY_KEY) ? ' active' : '';
+        html += '<button class="modal-tab' + delActive + '" data-tab="' + DELIVERY_KEY + '">🥡 ' + DELIVERY_KEY + '</button>';
+        tabsContainer.innerHTML = html;
+      },
+
+      /** Update the home screen cafeteria description */
+      updateHomeDesc() {
+        var desc = document.getElementById('home-cafeteria-desc');
+        if (desc) {
+          var canteens = Data.getCanteens();
+          desc.textContent = canteens.length > 0 ? canteens.join(' · ') : '暂无食堂，请添加';
+        }
+      },
+
       /** Update cafeteria card counts on the pick screen */
       updateCafeteriaCounts() {
-        document.querySelectorAll('[data-count]').forEach(el => {
-          const name = el.dataset.count;
-          const menu = Data.get(name);
-          el.textContent = menu.length + '道菜';
+        var cards = document.querySelectorAll('#cafeteria-grid .cafe-card[data-canteen]');
+        cards.forEach(function(el) {
+          var name = el.dataset.canteen;
+          var menu = Data.get(name);
+          var countEl = el.querySelector('.cafe-count');
+          if (countEl) countEl.textContent = menu.length + '道菜';
         });
       },
 
@@ -1270,16 +1516,23 @@
     // MANAGEMENT MODAL
     // ============================================================
     const Management = {
-      currentTab: '一饭',
+      currentTab: null,
+      mode: 'dishes',  // 'dishes' | 'canteens'
 
+      /** Open modal in dish-management mode */
       open() {
+        var canteens = Data.getCanteens();
+        Management.currentTab = canteens.length > 0 ? canteens[0] : DELIVERY_KEY;
+        Management.mode = 'dishes';
         document.getElementById('modal-overlay').classList.add('open');
-        Management.currentTab = '一饭';
-        // Highlight first tab
-        document.querySelectorAll('.modal-tab').forEach((t, i) => {
-          t.classList.toggle('active', i === 0);
-        });
-        Management.renderTab();
+        Management._renderDishView();
+      },
+
+      /** Open modal in canteen-management mode */
+      openCanteens() {
+        Management.mode = 'canteens';
+        document.getElementById('modal-overlay').classList.add('open');
+        Management._renderCanteenView();
       },
 
       close() {
@@ -1290,75 +1543,194 @@
 
       switchTab(name) {
         Management.currentTab = name;
-        document.querySelectorAll('.modal-tab').forEach(t => {
-          t.classList.toggle('active', t.dataset.tab === name);
-        });
-        Management.renderTab();
+        Management.mode = 'dishes';
+        Management._renderDishView();
       },
 
-      renderTab() {
-        const name = Management.currentTab;
-        const menu = Data.get(name);
-        const body = document.getElementById('modal-body');
+      /** Render the dish-management view */
+      _renderDishView() {
+        document.getElementById('modal-tabs').style.display = 'flex';
+        UI.renderModalTabs();
+        Management.renderTab();
+        document.getElementById('modal-footer-dishes').style.display = 'flex';
+        document.getElementById('modal-footer-canteens').style.display = 'none';
+      },
 
-        let html = `<div class="dish-count">${name} · 共 <strong>${menu.length}</strong> 道菜</div>`;
+      /** Render the canteen-management view */
+      _renderCanteenView() {
+        document.getElementById('modal-tabs').style.display = 'none';
+        Management._renderCanteenManager();
+        document.getElementById('modal-footer-dishes').style.display = 'none';
+        document.getElementById('modal-footer-canteens').style.display = 'flex';
+      },
 
-        if (menu.length === 0) {
-          html += `
-            <div class="empty-state">
-              <div class="empty-emoji">📭</div>
-              <div class="empty-text">还没有菜品，在下方添加吧</div>
-            </div>`;
+      _renderCanteenManager() {
+        var body = document.getElementById('modal-body');
+        var canteens = Data.getCanteens();
+        var html = '<div class="dish-count">🏫 食堂管理 · 共 <strong>' + canteens.length + '</strong> 个食堂</div>';
+
+        if (canteens.length === 0) {
+          html += '<div class="empty-state">' +
+            '<div class="empty-emoji">🏫</div>' +
+            '<div class="empty-text">还没有食堂，在下方添加吧</div>' +
+            '</div>';
         } else {
-          for (let i = 0; i < menu.length; i++) {
-            html += `
-              <div class="dish-item">
-                <span class="dish-name">${Management.escapeHtml(menu[i])}</span>
-                <button class="dish-del" data-index="${i}" title="删除">✕</button>
-              </div>`;
+          for (var i = 0; i < canteens.length; i++) {
+            var c = canteens[i];
+            var palette = getCanteenPalette(i);
+            var menu = Data.get(c);
+            html += '<div class="canteen-mgr-item">' +
+              '<div class="canteen-mgr-info">' +
+              '<span class="canteen-mgr-emoji">' + palette.emoji + '</span>' +
+              '<div>' +
+              '<div class="canteen-mgr-name">' + Management.escapeHtml(c) + '</div>' +
+              '<div class="canteen-mgr-count">共 ' + menu.length + ' 道菜</div>' +
+              '</div>' +
+              '</div>' +
+              '<button class="canteen-mgr-del" data-canteen="' + Management.escapeHtml(c) + '" title="删除食堂">✕</button>' +
+              '</div>';
           }
         }
 
-        // Add row
-        html += `
-          <div class="add-row">
-            <input type="text" id="input-new-dish" aria-label="新菜品名称" placeholder="输入新菜品名称…" maxlength="30" autocomplete="off" enterkeyhint="done">
-            <button class="btn-add" id="btn-add-dish">➕ 添加</button>
-          </div>`;
+        // Add canteen row
+        html += '<div class="canteen-add-row" style="margin-top:8px;">' +
+          '<input type="text" id="input-new-canteen" aria-label="新食堂名称" ' +
+          'placeholder="输入新食堂名称（最多10字）…" maxlength="10" autocomplete="off" enterkeyhint="done">' +
+          '<button class="btn-add" id="btn-add-canteen-confirm">➕ 添加</button>' +
+          '</div>';
 
         body.innerHTML = html;
 
         // Bind delete buttons
-        body.querySelectorAll('.dish-del').forEach(btn => {
-          btn.addEventListener('click', () => {
-            const idx = parseInt(btn.dataset.index);
-            const removed = menu[idx];
-            Data.remove(name, idx);
-            Management.renderTab();
-            UI.toast(`已删除「${removed}」`);
+        body.querySelectorAll('.canteen-mgr-del').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            var name = btn.dataset.canteen;
+            var menu = Data.get(name);
+            var msg = menu.length > 0
+              ? '确定要删除食堂「' + name + '」吗？\n其中的 ' + menu.length + ' 道菜也会被删除，此操作不可恢复。'
+              : '确定要删除食堂「' + name + '」吗？';
+            if (!confirm(msg)) return;
+            Data.deleteCanteen(name);
+            // If current tab was the deleted canteen, reset
+            if (Management.currentTab === name) {
+              var updated = Data.getCanteens();
+              Management.currentTab = updated.length > 0 ? updated[0] : DELIVERY_KEY;
+            }
+            UI.renderCafeteriaGrid();
+            UI.renderModalTabs();
+            Management._renderCanteenManager();
+            UI.toast('🗑️ 已删除食堂「' + name + '」');
           });
         });
 
         // Bind add
-        const input = body.querySelector('#input-new-dish');
-        const addBtn = body.querySelector('#btn-add-dish');
+        var input = body.querySelector('#input-new-canteen');
+        var addBtn = body.querySelector('#btn-add-canteen-confirm');
 
-        const doAdd = () => {
-          const val = input.value.trim();
+        var doAddCanteen = function() {
+          var val = input.value.trim();
+          if (!val) return;
+          if (val.length > 10) {
+            UI.toast('⚠️ 食堂名称不能超过10个字');
+            return;
+          }
+          if (val === DELIVERY_KEY) {
+            UI.toast('⚠️ 「' + DELIVERY_KEY + '」是保留名称，不能使用');
+            return;
+          }
+          var ok = Data.addCanteen(val);
+          if (!ok) {
+            UI.toast('⚠️ 食堂「' + val + '」已存在');
+            return;
+          }
+          UI.renderCafeteriaGrid();
+          UI.renderModalTabs();
+          Management._renderCanteenManager();
+          UI.toast('✅ 已添加食堂「' + val + '」');
+          // Re-focus
+          var newInput = document.getElementById('input-new-canteen');
+          if (newInput) {
+            newInput.focus();
+            newInput.value = '';
+          }
+        };
+
+        addBtn.addEventListener('click', doAddCanteen);
+        input.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') doAddCanteen();
+        });
+
+        setTimeout(function() {
+          var newInput = document.getElementById('input-new-canteen');
+          if (newInput) newInput.focus();
+        }, 100);
+      },
+
+      renderTab() {
+        var name = Management.currentTab;
+        var menu = Data.get(name);
+        var body = document.getElementById('modal-body');
+
+        var html = '<div class="dish-count">' + Management.escapeHtml(name) + ' · 共 <strong>' + menu.length + '</strong> 道菜</div>';
+
+        if (menu.length === 0) {
+          html +=
+            '<div class="empty-state">' +
+              '<div class="empty-emoji">📭</div>' +
+              '<div class="empty-text">还没有菜品，在下方添加吧</div>' +
+            '</div>';
+        } else {
+          for (var i = 0; i < menu.length; i++) {
+            html +=
+              '<div class="dish-item">' +
+                '<span class="dish-name">' + Management.escapeHtml(menu[i]) + '</span>' +
+                '<button class="dish-del" data-index="' + i + '" title="删除">✕</button>' +
+              '</div>';
+          }
+        }
+
+        // Add row
+        html +=
+          '<div class="add-row">' +
+            '<input type="text" id="input-new-dish" aria-label="新菜品名称" placeholder="输入新菜品名称…" maxlength="30" autocomplete="off" enterkeyhint="done">' +
+            '<button class="btn-add" id="btn-add-dish">➕ 添加</button>' +
+          '</div>';
+
+        body.innerHTML = html;
+
+        // Bind delete buttons
+        body.querySelectorAll('.dish-del').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            var idx = parseInt(btn.dataset.index);
+            var removed = menu[idx];
+            Data.remove(name, idx);
+            Management.renderTab();
+            UI.updateCafeteriaCounts();
+            UI.toast('已删除「' + removed + '」');
+          });
+        });
+
+        // Bind add
+        var input = body.querySelector('#input-new-dish');
+        var addBtn = body.querySelector('#btn-add-dish');
+
+        var doAdd = function() {
+          var val = input.value.trim();
           if (!val) return;
           if (val.length > 30) {
             UI.toast('⚠️ 菜品名称不能超过30个字');
             return;
           }
-          const ok = Data.add(name, val);
+          var ok = Data.add(name, val);
           if (!ok) {
             UI.toast('⚠️ 该菜品已存在');
             return;
           }
           Management.renderTab();
-          UI.toast(`✅ 已添加「${val}」到${name}`);
+          UI.updateCafeteriaCounts();
+          UI.toast('✅ 已添加「' + val + '」到' + name);
           // Re-focus input for quick adding
-          const newInput = document.getElementById('input-new-dish');
+          var newInput = document.getElementById('input-new-dish');
           if (newInput) {
             newInput.focus();
             newInput.value = '';
@@ -1366,19 +1738,19 @@
         };
 
         addBtn.addEventListener('click', doAdd);
-        input.addEventListener('keydown', (e) => {
+        input.addEventListener('keydown', function(e) {
           if (e.key === 'Enter') doAdd();
         });
 
         // Focus input
-        setTimeout(() => {
-          const newInput = document.getElementById('input-new-dish');
+        setTimeout(function() {
+          var newInput = document.getElementById('input-new-dish');
           if (newInput) newInput.focus();
         }, 100);
       },
 
       escapeHtml(str) {
-        const div = document.createElement('div');
+        var div = document.createElement('div');
         div.textContent = str;
         return div.innerHTML;
       }
@@ -1402,21 +1774,26 @@
         Management.open();
       });
 
+      document.getElementById('btn-manage-canteens-home').addEventListener('click', () => {
+        Management.openCanteens();
+      });
+
       // --- Cafeteria pick screen ---
       document.getElementById('btn-back-cafeteria').addEventListener('click', () => {
         UI.showScreen('home');
       });
 
-      document.querySelectorAll('.cafe-card').forEach(card => {
-        card.addEventListener('click', () => {
-          const canteen = card.dataset.canteen;
-          const menu = Data.get(canteen);
-          if (menu.length === 0) {
-            UI.toast(`⚠️ ${canteen}还没有菜品，请先在管理菜单中添加`);
-            return;
-          }
-          UI.showResult(canteen, canteen);
-        });
+      // Cafeteria card clicks use event delegation (grid is dynamically rendered)
+      document.getElementById('cafeteria-grid').addEventListener('click', (e) => {
+        var card = e.target.closest('.cafe-card[data-canteen]');
+        if (!card) return;
+        var canteen = card.dataset.canteen;
+        var menu = Data.get(canteen);
+        if (menu.length === 0) {
+          UI.toast('⚠️ ' + canteen + '还没有菜品，请先在管理菜单中添加');
+          return;
+        }
+        UI.showResult(canteen, canteen);
       });
 
       // --- Result screen ---
@@ -1484,13 +1861,14 @@
         const name = Management.currentTab;
         const menu = Data.get(name);
         if (menu.length === 0) {
-          UI.toast(`⚠️ ${name}已经是空的`);
+          UI.toast('⚠️ ' + name + '已经是空的');
           return;
         }
-        if (confirm(`确定要清空「${name}」的全部 ${menu.length} 道菜吗？此操作不可恢复。`)) {
+        if (confirm('确定要清空「' + name + '」的全部 ' + menu.length + ' 道菜吗？此操作不可恢复。')) {
           Data.clear(name);
           Management.renderTab();
-          UI.toast(`🗑️ 已清空${name}`);
+          UI.updateCafeteriaCounts();
+          UI.toast('🗑️ 已清空' + name);
         }
       });
 
@@ -1509,10 +1887,35 @@
     function init() {
       // Ensure data exists
       Data.getAll();
-      // Update initial counts
-      UI.updateCafeteriaCounts();
+      // Render dynamic UI
+      UI.renderCafeteriaGrid();
+      UI.updateHomeDesc();
       // Bind events
       bindEvents();
+
+      // ---- Mobile back-button support ----
+      // Replace initial history entry so the first back press has a state
+      history.replaceState({ screen: 'home' }, '', '');
+
+      window.addEventListener('popstate', function(event) {
+        // 1. If the management modal is open, close it first (don't navigate screens)
+        var overlay = document.getElementById('modal-overlay');
+        if (overlay.classList.contains('open')) {
+          Management.close();
+          // Push a replacement state so the next back press navigates screens
+          history.pushState({ screen: UI.currentScreen }, '', '');
+          return;
+        }
+
+        // 2. Navigate to the screen from the popped history entry
+        if (event.state && event.state.screen) {
+          UI._historyNav = true;
+          UI.showScreen(event.state.screen);
+          return;
+        }
+
+        // 3. No app state (at root) — browser will exit the PWA naturally
+      });
 
       // Register service worker for offline support
       if ('serviceWorker' in navigator) {
