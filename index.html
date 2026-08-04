@@ -1,0 +1,1526 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#FF6B4A">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="干饭选择器">
+  <meta name="description" content="随机干饭选择器 — 今天吃什么？让运气帮你决定！">
+  <title>随机干饭选择器</title>
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Google Font: Nunito for friendly rounded Latin text -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    /* ============================================================
+       DESIGN TOKEN SYSTEM — "Street Food Market"
+       A playful, warm palette inspired by night market food stalls.
+       Each cafeteria gets a distinct accent; the slot machine is
+       the signature interaction.
+       ============================================================ */
+    :root {
+      /* Core palette */
+      --bg:            #FFFBF5;
+      --card-bg:       #FFFFFF;
+      --primary:       #FF6B4A;
+      --primary-dark:  #E85D3A;
+      --primary-light: #FFF0EB;
+      --text:          #2C241D;
+      --text-secondary:#9B8A7D;
+      --text-muted:    #C4B8AE;
+      --border:        #F0E8DE;
+      --border-light:  #F5F0EA;
+
+      /* Semantic accents */
+      --success:       #5BBD72;
+      --danger:        #E05555;
+      --danger-light:  #FFF0F0;
+
+      /* Cafeteria identity colors */
+      --c1: #FF8C69;  /* 一饭 — coral */
+      --c2: #7EC8E3;  /* 二饭 — sky blue */
+      --c3: #6DCB80;  /* 三饭 — mint green */
+      --c4: #B8A9D4;  /* 四饭 — lavender */
+      --c5: #F0C75E;  /* 南亭 — warm gold */
+      --c6: #FF6B4A;  /* 外卖 — vibrant orange */
+
+      /* Cafeteria light backgrounds */
+      --c1-light: #FFF3EE;
+      --c2-light: #EEF8FB;
+      --c3-light: #EEFAF0;
+      --c4-light: #F5F2FA;
+      --c5-light: #FEFAEC;
+      --c6-light: #FFF0EB;
+
+      /* Shadows */
+      --shadow-xs: 0 1px 2px rgba(44,36,29,0.04);
+      --shadow-sm: 0 2px 8px rgba(44,36,29,0.06);
+      --shadow-md: 0 4px 20px rgba(44,36,29,0.08);
+      --shadow-lg: 0 8px 40px rgba(44,36,29,0.12);
+      --shadow-btn: 0 4px 14px rgba(255,107,74,0.3);
+
+      /* Radius */
+      --radius-xs: 8px;
+      --radius-sm: 12px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+      --radius-xl: 32px;
+      --radius-full: 9999px;
+
+      /* Typography */
+      --font: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+              'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
+              'Helvetica Neue', sans-serif;
+
+      /* Spacing */
+      --safe-bottom: env(safe-area-inset-bottom, 16px);
+    }
+
+    /* ============================================================
+       RESET & BASE
+       ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      font-family: var(--font);
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      overflow-x: hidden;
+      display: flex;
+      justify-content: center;
+    }
+
+    /* ============================================================
+       APP SHELL
+       ============================================================ */
+    #app {
+      width: 100%;
+      max-width: 430px;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      padding: 0 20px;
+      padding-bottom: var(--safe-bottom);
+    }
+
+    /* ============================================================
+       HEADER
+       ============================================================ */
+    .app-header {
+      padding: 20px 0 8px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .app-header .logo-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .app-header .logo-emoji {
+      font-size: 32px;
+      line-height: 1;
+      animation: logoWiggle 3s ease-in-out infinite;
+    }
+
+    @keyframes logoWiggle {
+      0%, 100% { transform: rotate(0deg); }
+      25%      { transform: rotate(10deg); }
+      75%      { transform: rotate(-10deg); }
+    }
+
+    .app-header h1 {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      color: var(--text);
+    }
+
+    .app-header .subtitle {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    /* ============================================================
+       SCREENS — show/hide
+       ============================================================ */
+    .screen {
+      display: none;
+      flex-direction: column;
+      flex: 1;
+      animation: screenIn 0.3s ease-out;
+    }
+    .screen.active { display: flex; }
+
+    @keyframes screenIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ============================================================
+       HOME SCREEN
+       ============================================================ */
+    .home-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding-top: 12px;
+    }
+
+    /* Big choice cards */
+    .choice-card {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border-radius: var(--radius-lg);
+      border: 2px solid transparent;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      min-height: 140px;
+    }
+
+    .choice-card:active {
+      transform: scale(0.97);
+    }
+
+    /* Cafeteria card */
+    .choice-card.cafeteria {
+      background: linear-gradient(135deg, #FFF3EE 0%, #FFE8E0 100%);
+      border-color: #FFD5C8;
+    }
+    .choice-card.cafeteria .card-emoji {
+      font-size: 48px;
+      filter: drop-shadow(0 4px 8px rgba(255,107,74,0.2));
+    }
+    .choice-card.cafeteria .card-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--primary-dark);
+    }
+    .choice-card.cafeteria .card-desc {
+      font-size: 13px;
+      font-weight: 600;
+      color: #D47E60;
+    }
+
+    /* Delivery card */
+    .choice-card.delivery {
+      background: linear-gradient(135deg, #FFF5EE 0%, #FFECD6 100%);
+      border-color: #FFD9B8;
+    }
+    .choice-card.delivery .card-emoji {
+      font-size: 48px;
+      filter: drop-shadow(0 4px 8px rgba(240,150,50,0.25));
+    }
+    .choice-card.delivery .card-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #E87830;
+    }
+    .choice-card.delivery .card-desc {
+      font-size: 13px;
+      font-weight: 600;
+      color: #C88A60;
+    }
+
+    /* Home footer link */
+    .home-footer {
+      flex-shrink: 0;
+      padding: 16px 0 8px;
+      text-align: center;
+    }
+
+    .home-footer button {
+      background: none;
+      border: none;
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      cursor: pointer;
+      padding: 10px 20px;
+      border-radius: var(--radius-full);
+      transition: background 0.2s;
+    }
+    .home-footer button:active {
+      background: var(--border-light);
+    }
+
+    /* ============================================================
+       CAFETERIA PICK SCREEN
+       ============================================================ */
+    .cafeteria-grid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr 1fr;
+      gap: 12px;
+      padding-top: 8px;
+      align-content: center;
+    }
+
+    .cafeteria-grid .cafe-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      user-select: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cafeteria-grid .cafe-card:active {
+      transform: scale(0.95);
+    }
+
+    /* Last card spans full width */
+    .cafeteria-grid .cafe-card:nth-child(5) {
+      grid-column: 1 / -1;
+    }
+
+    .cafe-card .cafe-emoji { font-size: 28px; }
+    .cafe-card .cafe-name {
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .cafe-card .cafe-count {
+      font-size: 11px;
+      font-weight: 600;
+      opacity: 0.7;
+    }
+
+    /* Cafeteria-specific styles */
+    .cafe-card.c1 { background: var(--c1-light); color: #D46540; }
+    .cafe-card.c2 { background: var(--c2-light); color: #4A8FA3; }
+    .cafe-card.c3 { background: var(--c3-light); color: #3D8F50; }
+    .cafe-card.c4 { background: var(--c4-light); color: #7B6B9E; }
+    .cafe-card.c5 { background: var(--c5-light); color: #B8932E; }
+
+    /* ============================================================
+       BACK BUTTON
+       ============================================================ */
+    .back-row {
+      display: flex;
+      align-items: center;
+      padding: 4px 0;
+      flex-shrink: 0;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: none;
+      border: none;
+      font-family: var(--font);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      cursor: pointer;
+      padding: 8px 12px 8px 8px;
+      border-radius: var(--radius-full);
+      transition: background 0.2s;
+    }
+    .back-btn:active { background: var(--border-light); }
+    .back-btn .arrow { font-size: 18px; }
+
+    .screen-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text);
+      margin-left: 4px;
+    }
+
+    /* ============================================================
+       RESULT SCREEN
+       ============================================================ */
+    .result-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      padding-bottom: 20px;
+    }
+
+    .result-source {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      background: var(--border-light);
+      padding: 6px 16px;
+      border-radius: var(--radius-full);
+    }
+
+    /* Slot machine display */
+    .slot-machine {
+      width: 100%;
+      max-width: 300px;
+      height: 120px;
+      background: var(--card-bg);
+      border: 2.5px dashed var(--border);
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .slot-machine.spinning {
+      border-color: var(--primary);
+      box-shadow: var(--shadow-md), 0 0 0 4px var(--primary-light);
+    }
+
+    .slot-machine.done {
+      border-style: solid;
+      border-color: var(--success);
+      box-shadow: var(--shadow-md), 0 0 0 4px #EEFAF0;
+    }
+
+    .slot-text {
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--text);
+      text-align: center;
+      padding: 16px;
+      transition: transform 0.05s ease;
+    }
+
+    .slot-text.bouncing {
+      animation: slotBounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes slotBounce {
+      0%   { transform: scale(1); }
+      40%  { transform: scale(1.15); }
+      70%  { transform: scale(0.95); }
+      100% { transform: scale(1); }
+    }
+
+    /* Result actions */
+    .result-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font);
+      font-size: 15px;
+      font-weight: 700;
+      border: none;
+      border-radius: var(--radius-full);
+      padding: 14px 28px;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s;
+      user-select: none;
+    }
+    .btn:active { transform: scale(0.95); }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #FFF;
+      box-shadow: var(--shadow-btn);
+    }
+    .btn-primary:active {
+      background: var(--primary-dark);
+      box-shadow: 0 2px 8px rgba(255,107,74,0.25);
+    }
+
+    .btn-outline {
+      background: var(--card-bg);
+      color: var(--text);
+      border: 2px solid var(--border);
+    }
+    .btn-outline:active { background: var(--border-light); }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-secondary);
+      padding: 10px 18px;
+      font-size: 14px;
+    }
+
+    .btn-danger {
+      background: var(--danger-light);
+      color: var(--danger);
+      font-size: 13px;
+      padding: 10px 20px;
+    }
+
+    /* ============================================================
+       MANAGEMENT MODAL (bottom sheet)
+       ============================================================ */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(44,36,29,0.4);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .modal-overlay.open {
+      display: flex;
+      animation: overlayIn 0.25s ease;
+    }
+    @keyframes overlayIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    .modal-sheet {
+      width: 100%;
+      max-width: 430px;
+      max-height: 85dvh;
+      background: var(--card-bg);
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: sheetUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: var(--shadow-lg);
+    }
+    @keyframes sheetUp {
+      from { transform: translateY(100%); }
+      to   { transform: translateY(0); }
+    }
+
+    .modal-handle {
+      width: 36px;
+      height: 4px;
+      background: var(--text-muted);
+      border-radius: 2px;
+      margin: 12px auto 8px;
+      flex-shrink: 0;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 20px 12px;
+      flex-shrink: 0;
+    }
+    .modal-header h3 {
+      font-size: 18px;
+      font-weight: 800;
+    }
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--border-light);
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+      transition: background 0.2s;
+    }
+    .modal-close:active { background: var(--border); }
+
+    /* Tab bar */
+    .modal-tabs {
+      display: flex;
+      gap: 6px;
+      padding: 0 20px 4px;
+      overflow-x: auto;
+      flex-shrink: 0;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    .modal-tabs::-webkit-scrollbar { display: none; }
+
+    .modal-tab {
+      flex-shrink: 0;
+      padding: 8px 14px;
+      border-radius: var(--radius-full);
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      background: var(--border-light);
+      color: var(--text-secondary);
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .modal-tab.active {
+      background: var(--text);
+      color: #FFF;
+    }
+
+    /* Dish list */
+    .modal-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .dish-count {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      padding-bottom: 4px;
+    }
+
+    .dish-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+      transition: background 0.2s;
+    }
+
+    .dish-item .dish-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .dish-item .dish-del {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .dish-item .dish-del:active {
+      background: #FFE8E8;
+      color: var(--danger);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 32px 16px;
+      color: var(--text-muted);
+    }
+    .empty-state .empty-emoji { font-size: 40px; margin-bottom: 8px; }
+    .empty-state .empty-text { font-size: 14px; font-weight: 600; }
+
+    /* Add dish row */
+    .add-row {
+      display: flex;
+      gap: 8px;
+      padding-top: 4px;
+    }
+    .add-row input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-full);
+      font-family: var(--font);
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      outline: none;
+      background: var(--bg);
+      transition: border-color 0.2s;
+    }
+    .add-row input:focus {
+      border-color: var(--primary);
+    }
+    .add-row input::placeholder {
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .btn-add {
+      flex-shrink: 0;
+      padding: 12px 20px;
+      border-radius: var(--radius-full);
+      background: var(--primary);
+      color: #FFF;
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-add:active { background: var(--primary-dark); }
+
+    /* Modal footer */
+    .modal-footer {
+      flex-shrink: 0;
+      padding: 12px 20px;
+      padding-bottom: calc(12px + var(--safe-bottom));
+      border-top: 1px solid var(--border-light);
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    /* ============================================================
+       TOAST
+       ============================================================ */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .toast {
+      padding: 12px 20px;
+      border-radius: var(--radius-full);
+      background: var(--text);
+      color: #FFF;
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 700;
+      box-shadow: var(--shadow-md);
+      animation: toastIn 0.3s ease, toastOut 0.3s ease 1.7s forwards;
+      text-align: center;
+      white-space: nowrap;
+    }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(-12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes toastOut {
+      from { opacity: 1; transform: translateY(0); }
+      to   { opacity: 0; transform: translateY(-12px); }
+    }
+
+    /* ============================================================
+       CONFETTI (result celebration)
+       ============================================================ */
+    .confetti-container {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 50;
+    }
+
+    .confetti-dot {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      animation: confettiFall 1.2s ease-out forwards;
+    }
+
+    @keyframes confettiFall {
+      0%   { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(1); }
+      100% { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(var(--dr)) scale(0.3); }
+    }
+
+    /* ============================================================
+       RESPONSIVE: wider screens get a phone-frame feel
+       ============================================================ */
+    @media (min-width: 431px) {
+      body {
+        background: #F0EBE5;
+        align-items: center;
+        padding: 20px;
+      }
+      #app {
+        background: var(--bg);
+        border-radius: 32px;
+        min-height: auto;
+        height: min(95dvh, 880px);
+        overflow-y: auto;
+        box-shadow: var(--shadow-lg);
+      }
+      .modal-sheet {
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      }
+    }
+
+    /* ============================================================
+       REDUCED MOTION
+       ============================================================ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- =========================================================
+       APP CONTAINER
+       ========================================================= -->
+  <div id="app">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo-row">
+        <span class="logo-emoji">🍚</span>
+        <h1>随机干饭选择器</h1>
+      </div>
+      <p class="subtitle">今天吃什么？让运气帮你决定</p>
+    </header>
+
+    <!-- =========================================================
+         SCREEN: HOME
+         ========================================================= -->
+    <div id="screen-home" class="screen active">
+      <div class="home-content">
+        <div class="choice-card cafeteria" id="btn-cafeteria">
+          <span class="card-emoji">🍽️</span>
+          <span class="card-title">去食堂吃饭</span>
+          <span class="card-desc">一饭 · 二饭 · 三饭 · 四饭 · 南亭</span>
+        </div>
+        <div class="choice-card delivery" id="btn-delivery">
+          <span class="card-emoji">🥡</span>
+          <span class="card-title">点外卖</span>
+          <span class="card-desc">从外卖菜单中随机挑选</span>
+        </div>
+      </div>
+      <div class="home-footer">
+        <button id="btn-manage">📋 管理菜单</button>
+      </div>
+    </div>
+
+    <!-- =========================================================
+         SCREEN: CAFETERIA PICK
+         ========================================================= -->
+    <div id="screen-cafeteria" class="screen">
+      <div class="back-row">
+        <button class="back-btn" id="btn-back-cafeteria">
+          <span class="arrow">←</span> 返回
+        </button>
+        <span class="screen-title">选择食堂</span>
+      </div>
+      <div class="cafeteria-grid">
+        <div class="cafe-card c1" data-canteen="一饭">
+          <span class="cafe-emoji">🍜</span>
+          <span class="cafe-name">一饭</span>
+          <span class="cafe-count" data-count="一饭">0道菜</span>
+        </div>
+        <div class="cafe-card c2" data-canteen="二饭">
+          <span class="cafe-emoji">🍛</span>
+          <span class="cafe-name">二饭</span>
+          <span class="cafe-count" data-count="二饭">0道菜</span>
+        </div>
+        <div class="cafe-card c3" data-canteen="三饭">
+          <span class="cafe-emoji">🍖</span>
+          <span class="cafe-name">三饭</span>
+          <span class="cafe-count" data-count="三饭">0道菜</span>
+        </div>
+        <div class="cafe-card c4" data-canteen="四饭">
+          <span class="cafe-emoji">🍲</span>
+          <span class="cafe-name">四饭</span>
+          <span class="cafe-count" data-count="四饭">0道菜</span>
+        </div>
+        <div class="cafe-card c5" data-canteen="南亭">
+          <span class="cafe-emoji">🥘</span>
+          <span class="cafe-name">南亭</span>
+          <span class="cafe-count" data-count="南亭">0道菜</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- =========================================================
+         SCREEN: RESULT
+         ========================================================= -->
+    <div id="screen-result" class="screen">
+      <div class="back-row">
+        <button class="back-btn" id="btn-back-result">
+          <span class="arrow">←</span> 返回
+        </button>
+        <span class="screen-title" id="result-screen-title">随机结果</span>
+      </div>
+      <div class="result-content">
+        <div class="result-source" id="result-source"></div>
+        <div class="slot-machine" id="slot-machine">
+          <span class="slot-text" id="slot-text">🎲 点击下方按钮开始</span>
+        </div>
+        <div class="result-actions">
+          <button class="btn btn-primary" id="btn-roll">🎲 开始随机</button>
+          <button class="btn btn-ghost" id="btn-home-from-result">🏠 返回首页</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===========================================================
+       MANAGEMENT MODAL (bottom sheet)
+       =========================================================== -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <h3>📋 管理菜单</h3>
+        <button class="modal-close" id="modal-close">✕</button>
+      </div>
+      <div class="modal-tabs" id="modal-tabs">
+        <button class="modal-tab active" data-tab="一饭">🍜 一饭</button>
+        <button class="modal-tab" data-tab="二饭">🍛 二饭</button>
+        <button class="modal-tab" data-tab="三饭">🍖 三饭</button>
+        <button class="modal-tab" data-tab="四饭">🍲 四饭</button>
+        <button class="modal-tab" data-tab="南亭">🥘 南亭</button>
+        <button class="modal-tab" data-tab="外卖">🥡 外卖</button>
+      </div>
+      <div class="modal-body" id="modal-body">
+        <!-- Dynamically filled -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="btn-clear-menu">🗑️ 清空当前菜单</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===========================================================
+       TOAST CONTAINER
+       =========================================================== -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- ===========================================================
+       CONFETTI CONTAINER
+       =========================================================== -->
+  <div class="confetti-container" id="confetti-container"></div>
+
+  <!-- ===========================================================
+       JAVASCRIPT — App Logic
+       =========================================================== -->
+  <script>
+  (function() {
+    'use strict';
+
+    // ============================================================
+    // CONSTANTS
+    // ============================================================
+    const MENU_KEYS = ['一饭', '二饭', '三饭', '四饭', '南亭', '外卖'];
+    const STORAGE_KEY = 'random_meal_picker_menus';
+
+    // Default dishes for first-time users
+    const DEFAULT_MENUS = {
+      '一饭': ['红烧肉', '糖醋排骨', '番茄炒蛋', '宫保鸡丁', '鱼香肉丝', '麻婆豆腐', '回锅肉', '酸菜鱼', '干煸四季豆'],
+      '二饭': ['黄焖鸡米饭', '兰州拉面', '麻辣烫', '水煮肉片', '干锅花菜', '红烧牛腩', '蛋炒饭', '馄饨', '油泼面'],
+      '三饭': ['煲仔饭', '叉烧饭', '烧鸭饭', '白切鸡', '卤肉饭', '荷叶饭', '炒河粉', '云吞面', '豉汁排骨'],
+      '四饭': ['烤肉拌饭', '石锅拌饭', '辛拉面', '炸鸡饭', '牛肉粉丝汤', '煎饼果子', '肉夹馍', '凉皮', '鸡蛋灌饼'],
+      '南亭': ['沙县小吃', '黄焖鸡', '麻辣香锅', '烤冷面', '螺蛳粉', '热干面', '肠粉', '鸡公煲', '烤鱼饭'],
+      '外卖': ['麦当劳', '肯德基', '必胜客', '汉堡王', '杨国福麻辣烫', '正新鸡排', '沙县小吃', '螺蛳粉', '华莱士']
+    };
+
+    // ============================================================
+    // DATA LAYER — LocalStorage CRUD
+    // ============================================================
+    const Data = {
+      /** Get all menus from LocalStorage, falling back to defaults */
+      getAll() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            // Validate structure
+            if (typeof parsed === 'object' && parsed !== null) {
+              // Merge with defaults to fill any missing keys
+              const merged = {};
+              for (const key of MENU_KEYS) {
+                merged[key] = (Array.isArray(parsed[key]) && parsed[key].length > 0)
+                  ? parsed[key]
+                  : [...DEFAULT_MENUS[key]];
+              }
+              return merged;
+            }
+          }
+        } catch (e) {
+          console.warn('LocalStorage read failed, using defaults:', e);
+        }
+        // First time: save and return defaults
+        const defaults = { ...DEFAULT_MENUS };
+        // Deep clone the defaults
+        for (const key of MENU_KEYS) {
+          defaults[key] = [...DEFAULT_MENUS[key]];
+        }
+        Data.saveAll(defaults);
+        return defaults;
+      },
+
+      /** Save all menus to LocalStorage */
+      saveAll(menus) {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(menus));
+        } catch (e) {
+          console.warn('LocalStorage write failed:', e);
+          UI.toast('⚠️ 存储空间不足，请清理一些菜品');
+        }
+      },
+
+      /** Get one menu by name */
+      get(name) {
+        const menus = Data.getAll();
+        return menus[name] || [...DEFAULT_MENUS[name]];
+      },
+
+      /** Add a dish to a menu */
+      add(name, dish) {
+        const menus = Data.getAll();
+        if (!menus[name]) menus[name] = [];
+        // Prevent duplicates
+        if (menus[name].includes(dish)) return false;
+        menus[name].push(dish);
+        Data.saveAll(menus);
+        return true;
+      },
+
+      /** Remove a dish by index */
+      remove(name, index) {
+        const menus = Data.getAll();
+        if (!menus[name]) return;
+        menus[name].splice(index, 1);
+        Data.saveAll(menus);
+      },
+
+      /** Clear an entire menu */
+      clear(name) {
+        const menus = Data.getAll();
+        menus[name] = [];
+        Data.saveAll(menus);
+      },
+
+      /** Get a random dish from a menu. Returns null if empty. */
+      random(name) {
+        const menu = Data.get(name);
+        if (!menu || menu.length === 0) return null;
+        return menu[Math.floor(Math.random() * menu.length)];
+      },
+
+      /** Reset all menus to defaults */
+      resetAll() {
+        const defaults = {};
+        for (const key of MENU_KEYS) {
+          defaults[key] = [...DEFAULT_MENUS[key]];
+        }
+        Data.saveAll(defaults);
+      },
+
+      /** Import dishes from a JSON file */
+      import(jsonData) {
+        try {
+          const imported = typeof jsonData === 'string' ? JSON.parse(jsonData) : jsonData;
+          const menus = Data.getAll();
+          for (const key of MENU_KEYS) {
+            if (Array.isArray(imported[key])) {
+              for (const dish of imported[key]) {
+                if (typeof dish === 'string' && dish.trim() && !menus[key].includes(dish.trim())) {
+                  menus[key].push(dish.trim());
+                }
+              }
+            }
+          }
+          Data.saveAll(menus);
+          return true;
+        } catch (e) {
+          return false;
+        }
+      }
+    };
+
+    // ============================================================
+    // UI LAYER — Screen navigation & rendering
+    // ============================================================
+    const UI = {
+      currentScreen: 'home',
+      /** State for the result screen */
+      resultState: { source: null, sourceName: null },
+
+      /** Switch to a screen */
+      showScreen(name) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        const target = document.getElementById('screen-' + name);
+        if (target) {
+          target.classList.add('active');
+          UI.currentScreen = name;
+        }
+      },
+
+      /** Navigate to result screen for a given source */
+      showResult(source, sourceName) {
+        UI.resultState = { source, sourceName };
+        document.getElementById('result-source').textContent =
+          (source === '外卖') ? '🥡 外卖随机推荐' : `🍽️ ${sourceName} · 为你推荐`;
+        document.getElementById('result-screen-title').textContent =
+          (source === '外卖') ? '外卖随机' : `${sourceName} 随机`;
+        // Reset slot machine
+        const slotMachine = document.getElementById('slot-machine');
+        const slotText = document.getElementById('slot-text');
+        slotMachine.className = 'slot-machine';
+        slotText.className = 'slot-text';
+        slotText.textContent = '🎲 点击下方按钮开始';
+        document.getElementById('btn-roll').style.display = '';
+        UI.showScreen('result');
+      },
+
+      /** Update cafeteria card counts on the pick screen */
+      updateCafeteriaCounts() {
+        document.querySelectorAll('[data-count]').forEach(el => {
+          const name = el.dataset.count;
+          const menu = Data.get(name);
+          el.textContent = menu.length + '道菜';
+        });
+      },
+
+      /** Toast notification */
+      toast(message) {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = message;
+        container.appendChild(toast);
+        // Auto-remove after animation
+        setTimeout(() => {
+          if (toast.parentNode) toast.parentNode.removeChild(toast);
+        }, 2100);
+      },
+
+      /** Burst confetti from the center of the screen */
+      confetti() {
+        const container = document.getElementById('confetti-container');
+        const colors = ['#FF6B4A','#FF8C69','#7EC8E3','#6DCB80','#F0C75E','#B8A9D4','#FFB84D'];
+        const cx = window.innerWidth / 2;
+        const cy = window.innerHeight / 2;
+        const fragment = document.createDocumentFragment();
+
+        for (let i = 0; i < 60; i++) {
+          const dot = document.createElement('div');
+          dot.className = 'confetti-dot';
+          const angle = (Math.PI * 2 * i) / 60 + (Math.random() - 0.5) * 0.4;
+          const distance = 80 + Math.random() * 160;
+          dot.style.cssText = `
+            left: ${cx}px; top: ${cy}px;
+            background: ${colors[Math.floor(Math.random() * colors.length)]};
+            --dx: ${Math.cos(angle) * distance}px;
+            --dy: ${Math.sin(angle) * distance - 40}px;
+            --dr: ${(Math.random() - 0.5) * 720}deg;
+            animation-delay: ${Math.random() * 0.3}s;
+            animation-duration: ${0.9 + Math.random() * 0.8}s;
+          `;
+          fragment.appendChild(dot);
+        }
+        container.appendChild(fragment);
+        // Clean up
+        setTimeout(() => {
+          while (container.firstChild) container.removeChild(container.firstChild);
+        }, 2000);
+      }
+    };
+
+    // ============================================================
+    // SLOT MACHINE ANIMATION
+    // ============================================================
+    const SlotMachine = {
+      isSpinning: false,
+      timerId: null,
+
+      /**
+       * Spin the slot machine and call onDone with the chosen dish.
+       * Creates a decelerating random-flash effect.
+       */
+      spin(menu, onDone) {
+        if (SlotMachine.isSpinning) return;
+        SlotMachine.isSpinning = true;
+
+        const slotMachine = document.getElementById('slot-machine');
+        const slotText = document.getElementById('slot-text');
+        const btnRoll = document.getElementById('btn-roll');
+
+        // Disable button during spin
+        btnRoll.style.display = 'none';
+        slotMachine.className = 'slot-machine spinning';
+        slotText.className = 'slot-text';
+
+        const totalFrames = 28;
+        let frame = 0;
+        // Pre-determine the final result
+        const result = menu[Math.floor(Math.random() * menu.length)];
+
+        function tick() {
+          frame++;
+
+          // Pick a display item: mostly random, but last few frames converge to result
+          let displayItem;
+          if (frame >= totalFrames) {
+            displayItem = result;
+          } else if (frame >= totalFrames - 4) {
+            // Last 4 frames: show the result more often (convergence)
+            displayItem = Math.random() < 0.5 ? result : menu[Math.floor(Math.random() * menu.length)];
+          } else {
+            displayItem = menu[Math.floor(Math.random() * menu.length)];
+          }
+
+          slotText.textContent = displayItem;
+
+          // Add shake effect during fast spinning
+          if (frame < totalFrames * 0.6) {
+            const shakeX = (Math.random() - 0.5) * 4;
+            const shakeY = (Math.random() - 0.5) * 3;
+            slotText.style.transform = `translate(${shakeX}px, ${shakeY}px)`;
+          } else {
+            slotText.style.transform = '';
+          }
+
+          // Schedule next frame with increasing delay (deceleration)
+          if (frame < totalFrames) {
+            let delay;
+            const progress = frame / totalFrames;
+            if (progress < 0.5) {
+              delay = 60;                          // Fast
+            } else if (progress < 0.75) {
+              delay = 60 + (progress - 0.5) * 400; // Medium deceleration
+            } else {
+              delay = 160 + (progress - 0.75) * 800; // Slow deceleration
+            }
+            SlotMachine.timerId = setTimeout(tick, delay);
+          } else {
+            // Done! Show final result
+            slotText.textContent = result;
+            slotText.style.transform = '';
+            slotMachine.className = 'slot-machine done';
+
+            // Bounce animation
+            slotText.classList.add('bouncing');
+            setTimeout(() => slotText.classList.remove('bouncing'), 500);
+
+            // Confetti
+            UI.confetti();
+
+            // Re-enable
+            SlotMachine.isSpinning = false;
+            btnRoll.style.display = '';
+            btnRoll.textContent = '🔄 再来一次';
+
+            if (onDone) onDone(result);
+          }
+        }
+
+        tick();
+      }
+    };
+
+    // ============================================================
+    // MANAGEMENT MODAL
+    // ============================================================
+    const Management = {
+      currentTab: '一饭',
+
+      open() {
+        document.getElementById('modal-overlay').classList.add('open');
+        Management.currentTab = '一饭';
+        // Highlight first tab
+        document.querySelectorAll('.modal-tab').forEach((t, i) => {
+          t.classList.toggle('active', i === 0);
+        });
+        Management.renderTab();
+      },
+
+      close() {
+        document.getElementById('modal-overlay').classList.remove('open');
+        // Refresh cafeteria counts on home/pick screens
+        UI.updateCafeteriaCounts();
+      },
+
+      switchTab(name) {
+        Management.currentTab = name;
+        document.querySelectorAll('.modal-tab').forEach(t => {
+          t.classList.toggle('active', t.dataset.tab === name);
+        });
+        Management.renderTab();
+      },
+
+      renderTab() {
+        const name = Management.currentTab;
+        const menu = Data.get(name);
+        const body = document.getElementById('modal-body');
+
+        let html = `<div class="dish-count">${name} · 共 <strong>${menu.length}</strong> 道菜</div>`;
+
+        if (menu.length === 0) {
+          html += `
+            <div class="empty-state">
+              <div class="empty-emoji">📭</div>
+              <div class="empty-text">还没有菜品，在下方添加吧</div>
+            </div>`;
+        } else {
+          for (let i = 0; i < menu.length; i++) {
+            html += `
+              <div class="dish-item">
+                <span class="dish-name">${Management.escapeHtml(menu[i])}</span>
+                <button class="dish-del" data-index="${i}" title="删除">✕</button>
+              </div>`;
+          }
+        }
+
+        // Add row
+        html += `
+          <div class="add-row">
+            <input type="text" id="input-new-dish" placeholder="输入新菜品名称…" maxlength="30" autocomplete="off">
+            <button class="btn-add" id="btn-add-dish">➕ 添加</button>
+          </div>`;
+
+        body.innerHTML = html;
+
+        // Bind delete buttons
+        body.querySelectorAll('.dish-del').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const idx = parseInt(btn.dataset.index);
+            const removed = menu[idx];
+            Data.remove(name, idx);
+            Management.renderTab();
+            UI.toast(`已删除「${removed}」`);
+          });
+        });
+
+        // Bind add
+        const input = body.querySelector('#input-new-dish');
+        const addBtn = body.querySelector('#btn-add-dish');
+
+        const doAdd = () => {
+          const val = input.value.trim();
+          if (!val) return;
+          if (val.length > 30) {
+            UI.toast('⚠️ 菜品名称不能超过30个字');
+            return;
+          }
+          const ok = Data.add(name, val);
+          if (!ok) {
+            UI.toast('⚠️ 该菜品已存在');
+            return;
+          }
+          Management.renderTab();
+          UI.toast(`✅ 已添加「${val}」到${name}`);
+          // Re-focus input for quick adding
+          const newInput = document.getElementById('input-new-dish');
+          if (newInput) {
+            newInput.focus();
+            newInput.value = '';
+          }
+        };
+
+        addBtn.addEventListener('click', doAdd);
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') doAdd();
+        });
+
+        // Focus input
+        setTimeout(() => {
+          const newInput = document.getElementById('input-new-dish');
+          if (newInput) newInput.focus();
+        }, 100);
+      },
+
+      escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      }
+    };
+
+    // ============================================================
+    // EVENT BINDINGS
+    // ============================================================
+    function bindEvents() {
+      // --- Home screen ---
+      document.getElementById('btn-cafeteria').addEventListener('click', () => {
+        UI.updateCafeteriaCounts();
+        UI.showScreen('cafeteria');
+      });
+
+      document.getElementById('btn-delivery').addEventListener('click', () => {
+        UI.showResult('外卖', '外卖');
+      });
+
+      document.getElementById('btn-manage').addEventListener('click', () => {
+        Management.open();
+      });
+
+      // --- Cafeteria pick screen ---
+      document.getElementById('btn-back-cafeteria').addEventListener('click', () => {
+        UI.showScreen('home');
+      });
+
+      document.querySelectorAll('.cafe-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const canteen = card.dataset.canteen;
+          const menu = Data.get(canteen);
+          if (menu.length === 0) {
+            UI.toast(`⚠️ ${canteen}还没有菜品，请先在管理菜单中添加`);
+            return;
+          }
+          UI.showResult(canteen, canteen);
+        });
+      });
+
+      // --- Result screen ---
+      document.getElementById('btn-back-result').addEventListener('click', () => {
+        if (SlotMachine.isSpinning) {
+          clearTimeout(SlotMachine.timerId);
+          SlotMachine.isSpinning = false;
+          document.getElementById('btn-roll').style.display = '';
+        }
+        // Go back to previous screen
+        if (UI.resultState.source === '外卖') {
+          UI.showScreen('home');
+        } else {
+          UI.updateCafeteriaCounts();
+          UI.showScreen('cafeteria');
+        }
+      });
+
+      document.getElementById('btn-home-from-result').addEventListener('click', () => {
+        if (SlotMachine.isSpinning) {
+          clearTimeout(SlotMachine.timerId);
+          SlotMachine.isSpinning = false;
+        }
+        UI.showScreen('home');
+      });
+
+      document.getElementById('btn-roll').addEventListener('click', () => {
+        const { source } = UI.resultState;
+        const menu = Data.get(source);
+        if (menu.length === 0) {
+          UI.toast(`⚠️ ${source}还没有菜品，请先在管理菜单中添加`);
+          return;
+        }
+        if (menu.length === 1) {
+          // Only one item — skip animation
+          const slotMachine = document.getElementById('slot-machine');
+          const slotText = document.getElementById('slot-text');
+          const btnRoll = document.getElementById('btn-roll');
+          slotText.textContent = menu[0];
+          slotMachine.className = 'slot-machine done';
+          slotText.classList.add('bouncing');
+          setTimeout(() => slotText.classList.remove('bouncing'), 500);
+          btnRoll.textContent = '🔄 再来一次';
+          UI.confetti();
+          return;
+        }
+        SlotMachine.spin(menu, (result) => {
+          // Optional: callback after spin completes
+        });
+      });
+
+      // --- Management modal ---
+      document.getElementById('modal-close').addEventListener('click', () => Management.close());
+      document.getElementById('modal-overlay').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) Management.close();
+      });
+
+      document.getElementById('modal-tabs').addEventListener('click', (e) => {
+        const tab = e.target.closest('.modal-tab');
+        if (!tab) return;
+        Management.switchTab(tab.dataset.tab);
+      });
+
+      document.getElementById('btn-clear-menu').addEventListener('click', () => {
+        const name = Management.currentTab;
+        const menu = Data.get(name);
+        if (menu.length === 0) {
+          UI.toast(`⚠️ ${name}已经是空的`);
+          return;
+        }
+        if (confirm(`确定要清空「${name}」的全部 ${menu.length} 道菜吗？此操作不可恢复。`)) {
+          Data.clear(name);
+          Management.renderTab();
+          UI.toast(`🗑️ 已清空${name}`);
+        }
+      });
+
+      // --- Keyboard: Escape closes modal ---
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          const overlay = document.getElementById('modal-overlay');
+          if (overlay.classList.contains('open')) Management.close();
+        }
+      });
+    }
+
+    // ============================================================
+    // INIT
+    // ============================================================
+    function init() {
+      // Ensure data exists
+      Data.getAll();
+      // Update initial counts
+      UI.updateCafeteriaCounts();
+      // Bind events
+      bindEvents();
+
+      // Register service worker for offline support
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').catch(() => {
+          // Silent fail — app works without SW
+        });
+      }
+
+      console.log('🍚 随机干饭选择器 已就绪');
+      console.log('   今天吃什么？交给运气吧！');
+    }
+
+    // Run on DOM ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  })();
+  </script>
+</body>
+</html>
