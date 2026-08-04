@@ -6,20 +6,24 @@
 
 const CACHE_NAME = 'meal-picker-v1';
 const APP_ASSETS = [
-  './',
   './index.html',
   './manifest.json',
   './icon-192x192.png',
-  './icon-512x512.png'
+  './icon-512x512.png',
+  './icon-maskable-512x512.png'
 ];
 
-/** Install: pre-cache app shell */
+/** Install: pre-cache app shell (individual adds so partial failures are OK) */
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(APP_ASSETS);
-    }).catch(() => {
-      // Individual file failures don't kill the SW
+      return Promise.allSettled(
+        APP_ASSETS.map((url) =>
+          cache.add(url).catch((err) => {
+            console.warn('SW: failed to cache', url, err);
+          })
+        )
+      );
     })
   );
   // Activate immediately — don't wait for old SW to close

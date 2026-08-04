@@ -2,9 +2,9 @@
   "name": "随机干饭选择器",
   "short_name": "干饭选择器",
   "description": "今天吃什么？让运气帮你决定！随机抽取食堂或外卖，告别选择困难。",
-  "id": "/random-meal-picker/",
-  "start_url": "/random-meal-picker/",
-  "scope": "/random-meal-picker/",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait",
@@ -13,16 +13,22 @@
   "lang": "zh-CN",
   "icons": [
     {
-      "src": "/random-meal-picker/icon-192x192.png",
+      "src": "icon-192x192.png",
       "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512x512.png",
+      "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/random-meal-picker/icon-512x512.png",
+      "src": "icon-maskable-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "maskable"
     }
   ]
 }
