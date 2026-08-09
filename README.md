@@ -1,149 +1,272 @@
-# 🍚 随机干饭选择器
+# 🍚 Random Meal Picker · 随机干饭选择器
 
-[![PWA Ready](https://img.shields.io/badge/PWA-ready-brightgreen)](https://noone-sketch.github.io/random-meal-picker/)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
+<p align="center">
+  <strong>Can't decide what to eat? Let luck choose for you! 🎲</strong>
+  <br>
+  <em>今天吃什么？让运气帮你决定！告别选择困难。</em>
+</p>
 
-> 今天吃什么？让运气帮你决定！随机抽取食堂或外卖，告别选择困难。
+<p align="center">
+  <a href="https://noone-sketch.github.io/random-meal-picker/"><img src="https://img.shields.io/badge/demo-live-brightgreen?style=flat-square" alt="Live Demo"></a>
+  <a href="#license"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License: MIT"></a>
+  <a href="#pwa"><img src="https://img.shields.io/badge/PWA-ready-FF6B4A?style=flat-square" alt="PWA Ready"></a>
+  <img src="https://img.shields.io/badge/vanilla-js-F7DF1E?style=flat-square&logo=javascript" alt="Vanilla JS">
+  <img src="https://img.shields.io/badge/zero-dependencies-success?style=flat-square" alt="Zero Dependencies">
+</p>
 
-**在线体验** → [noone-sketch.github.io/random-meal-picker](https://noone-sketch.github.io/random-meal-picker/)
+---
 
-## ✨ 功能
+A playful, installable PWA that randomly picks your next meal — choose from multiple cafeterias or food delivery menus. Built with a slot-machine animation, confetti celebration, and full offline support. Zero frameworks, zero dependencies, one HTML file.
 
-| 功能 | 说明 |
-|------|------|
-| 🍽️ 去食堂吃饭 | 从多个食堂中任选一个，随机抽取该食堂菜品 |
-| 🥡 点外卖 | 从外卖菜单中直接随机抽取 |
-| 🎲 随机动画 | 老虎机式抽选动画 + 彩纸庆祝效果 |
-| 📋 菜单管理 | 独立菜单管理，支持新增 / 删除 / 清空 |
-| 💾 本地存储 | LocalStorage 持久化，离线可用，无需后端 |
-| 📱 PWA | 可安装到手机主屏幕，支持离线访问 |
+> 🏫 Originally designed for university students in China with on-campus cafeterias. Fully customizable — add your own cafeterias and dishes!
 
-## 📁 项目结构
+**[▶️ Try it live](https://noone-sketch.github.io/random-meal-picker/)**
 
-```
-.
-├── index.html          # 主应用（HTML + CSS + JS 单文件）
-├── manifest.json       # PWA 应用清单
-├── sw.js               # Service Worker（离线缓存）
-├── icon-192x192.png    # PWA 图标
-├── icon-512x512.png
-├── icon-maskable-512x512.png
-└── README.md
-```
+---
 
-## 🚀 快速开始
+## 📑 Table of Contents
 
-### 直接打开
+- [✨ Features](#-features)
+- [📸 Screenshots](#-screenshots)
+- [🚀 Getting Started](#-getting-started)
+- [📦 Deploy](#-deploy)
+- [📱 PWA & Mobile Apps](#-pwa--mobile-apps)
+- [📁 Project Structure](#-project-structure)
+- [🛠 Tech Stack](#-tech-stack)
+- [🎨 Design System](#-design-system)
+- [💾 Data](#-data)
+- [🤝 Contributing](#-contributing)
+- [📄 License](#-license)
 
-用浏览器打开 `index.html` 即可运行。
+---
 
-### 本地开发服务器（推荐）
+## ✨ Features
+
+| Feature | Description |
+|---|---|
+| 🍽️ **Cafeteria Mode** | Pick a cafeteria, then randomly draw a dish from its menu |
+| 🥡 **Delivery Mode** | Randomly select from your delivery menu in one tap |
+| 🎰 **Slot Machine Animation** | Decelerating reel-spin effect with a satisfying bounce finish |
+| 🎉 **Confetti Celebration** | Burst of colorful particles when a result is revealed |
+| 📋 **Full Menu Management** | Add / remove / clear individual dishes per cafeteria; add / remove entire cafeterias |
+| 💾 **LocalStorage Persistence** | All data lives in your browser — no server, no sign-up, fully offline |
+| 📱 **Installable PWA** | Add to your phone's home screen; works offline via Service Worker |
+| ♿ **Accessibility** | `prefers-reduced-motion` support, semantic HTML, keyboard navigation |
+| 🌐 **Responsive** | Mobile-first layout with a phone-frame appearance on wider screens |
+
+---
+
+## 📸 Screenshots
+
+<!-- TODO: Add screenshots of the home screen, slot machine animation, and menu management modal -->
+<!-- Example: -->
+<!-- <p align="center"> -->
+<!--   <img src="screenshots/home.png" width="250" alt="Home Screen"> -->
+<!--   <img src="screenshots/slot.png" width="250" alt="Slot Machine"> -->
+<!--   <img src="screenshots/manage.png" width="250" alt="Menu Management"> -->
+<!-- </p> -->
+
+> 💡 **Tip:** Screenshots make your project stand out on GitHub! Take a few and add them above.
+
+---
+
+## 🚀 Getting Started
+
+### Open directly
+
+Just open `index.html` in any modern browser — that's it.
+
+### Local dev server (recommended for PWA features)
 
 ```bash
-# 在项目目录下启动任意 HTTP 服务器
+# Any HTTP server works:
 npx serve .
 
-# 或 Python
+# Or Python:
 python -m http.server 8080
 
-# 或 Node.js
+# Or Node.js:
 npx http-server . -p 8080
 ```
 
-手机和电脑连同一 WiFi，用手机浏览器访问 `http://<电脑IP>:8080` 即可调试。
+> ⚠️ Service Workers (and thus PWA install) only work over `https://` or `localhost`, not `file://`.
 
-> **提示**：直接双击打开的 `file://` 协议下 Service Worker 不生效，PWA 安装功能需要 HTTP(S)。
+To test on mobile, connect your phone and computer to the same WiFi, then visit `http://<your-computer-ip>:8080` from your phone's browser.
 
-### 部署到公网
+---
 
-**GitHub Pages**（免费，推荐）：
+## 📦 Deploy
+
+### GitHub Pages (free — recommended)
 
 ```bash
 git init
 git add .
-git commit -m "Init: 随机干饭选择器"
+git commit -m "Init: Random Meal Picker"
 git branch -M main
-git remote add origin https://github.com/<你的用户名>/random-meal-picker.git
+git remote add origin https://github.com/<your-username>/random-meal-picker.git
 git push -u origin main
 ```
 
-在仓库 Settings → Pages → 选择 main 分支 → Save，几分钟后通过 `https://<用户名>.github.io/random-meal-picker/` 访问。
+Then go to **Settings → Pages** → select `main` branch → Save. Your app will be live at `https://<username>.github.io/random-meal-picker/`.
 
-其他免费选项：Vercel、Netlify、Cloudflare Pages（拖拽文件夹即可部署）。
+### Other platforms
 
-## 📦 打包为手机 App
+| Platform | Setup |
+|---|---|
+| **Vercel** | Import the repo — zero config needed |
+| **Netlify** | Drag & drop the project folder |
+| **Cloudflare Pages** | Connect your repo and deploy |
 
-### 方式一：PWA 直接安装（推荐，零成本）
+---
 
-1. 用手机浏览器（Chrome / Safari）打开部署后的网址
-2. **Android Chrome**：会自动弹出「添加到主屏幕」提示；或点菜单 → 添加到主屏幕
-3. **iPhone Safari**：点底部分享按钮 → 添加到主屏幕
-4. 安装后像原生 App 一样使用，离线也能打开
+## 📱 PWA & Mobile Apps
 
-### 方式二：PWABuilder 打包 APK
+### Option 1: Install as PWA (recommended, free)
 
-1. 将项目部署到公网
-2. 打开 [PWABuilder.com](https://www.pwabuilder.com/)
-3. 输入网址 → 验证通过后点击「Package for Stores」
-4. 选择 Android → 下载 `.apk` 或 `.aab`
-5. 传到手机直接安装（APK），或提交到 Google Play（AAB）
+| Platform | Steps |
+|---|---|
+| **Android (Chrome)** | Open the site → tap the "Add to Home Screen" prompt, or Menu → Add to Home Screen |
+| **iPhone (Safari)** | Tap the Share button → "Add to Home Screen" |
 
-### 方式三：Bubblewrap 命令行打包
+Once installed, it works like a native app — full-screen, offline-capable, with its own app icon.
+
+### Option 2: Package as APK
+
+1. Deploy to a public URL
+2. Go to [PWABuilder.com](https://www.pwabuilder.com/)
+3. Enter your URL → "Package for Stores" → Download `.apk`
+
+### Option 3: Bubblewrap (CLI)
 
 ```bash
 npm install -g @bubblewrap/cli
-bubblewrap init --manifest https://你的域名/manifest.json
+bubblewrap init --manifest https://your-domain/manifest.json
 bubblewrap build
 ```
 
-### 方式四：iOS 打包
-
-iOS 不支持直接侧载 PWA。替代方案：
-- **添加到主屏幕**（方式一）— 体验已足够好
-- **PWABuilder** 的 iOS 包选项（生成 Xcode 项目）
-- **Capacitor 封装**（需 Mac + Xcode）：
+### Option 4: iOS via Capacitor
 
 ```bash
 npm init -y
 npm install @capacitor/core @capacitor/cli @capacitor/ios
-npx cap init "干饭选择器" com.yourname.mealpicker
+npx cap init "Meal Picker" com.yourname.mealpicker
 npx cap add ios
-# 将 index.html / manifest.json / sw.js 放入 www/ 目录
-npx cap open ios
+# Copy index.html / manifest.json / sw.js into www/
+npx cap open ios   # Requires macOS + Xcode
 ```
 
-## 💾 数据管理
+---
 
-- 所有菜单数据存储在浏览器 `localStorage` 中
-- 首次打开自动加载默认菜品
-- 清除浏览器缓存会丢失数据，建议定期导出
-- 存储 key：`random_meal_picker_menus`
+## 📁 Project Structure
 
-### 数据导出 / 导入
+```
+random-meal-picker/
+├── index.html              # 🎯 The entire app — HTML + CSS + JS (single file)
+├── manifest.json           # PWA manifest
+├── sw.js                   # Service Worker — offline caching & cache-first strategy
+├── icon-192x192.png        # PWA app icon (small)
+├── icon-512x512.png        # PWA app icon (large)
+├── icon-maskable-512x512.png # PWA maskable icon (adaptive shapes)
+├── LICENSE
+└── README.md
+```
 
-在浏览器控制台执行：
+Yes, the entire app lives in `index.html`. No build step, no bundler, no package.json — just open and it works.
 
-```javascript
-// 导出（JSON 自动复制到剪贴板）
+---
+
+## 🛠 Tech Stack
+
+| Layer | Choice |
+|---|---|
+| **UI** | HTML5 + CSS3 with a custom design-token system (CSS custom properties) |
+| **Logic** | Vanilla JavaScript (ES6+), strict mode |
+| **Storage** | `localStorage` — data persists per-browser |
+| **Offline** | Service Worker with cache-first strategy |
+| **Typography** | [Google Fonts — Nunito](https://fonts.google.com/specimen/Nunito) |
+| **Frameworks** | None. Zero dependencies. |
+
+### Why zero-dependency?
+
+This app was built to be **simple, fast, and forever-maintainable**. No `node_modules`, no build pipeline, no breaking changes from upstream packages. The entire logic is ~900 lines of readable vanilla JS. It loads instantly and works everywhere.
+
+---
+
+## 🎨 Design System
+
+The visual language is inspired by **night-market street food stalls** — warm paper-white backgrounds, a vibrant coral-orange primary, and each cafeteria gets its own distinct accent color.
+
+| Token | Value |
+|---|---|
+| Background | `#FFFBF5` (warm paper) |
+| Primary | `#FF6B4A` (coral orange) |
+| Font | Nunito (rounded, friendly) |
+| Corners | 8–32px (generous radius for a soft feel) |
+| Shadows | Layered warm-tinted shadows |
+
+### The Slot Machine
+
+The signature interaction is a **slot-machine reel animation** — text rapidly flashes through menu items with a deceleration curve, then lands on the result with a bounce. A burst of confetti particles celebrates the reveal, turning every choice into a small moment of delight.
+
+`prefers-reduced-motion` is respected: all animations are disabled when the user's OS requests it.
+
+---
+
+## 💾 Data
+
+All menu data is stored in your browser's `localStorage` under the key `random_meal_picker_menus` (canteens under `random_meal_picker_canteens`).
+
+### Default Data
+
+On first launch, the app seeds itself with ~50 Chinese dishes across 5 cafeterias + a delivery menu. You can clear, modify, or add to everything.
+
+### Export / Import
+
+Open your browser's DevTools console:
+
+```js
+// Export menu data (copies JSON to clipboard)
 copy(JSON.stringify(JSON.parse(localStorage.getItem('random_meal_picker_menus')), null, 2))
 
-// 导入
-localStorage.setItem('random_meal_picker_menus', JSON.stringify(/* 粘贴你的 JSON */))
-// 刷新页面生效
+// Import menu data
+localStorage.setItem('random_meal_picker_menus', JSON.stringify(/* paste your JSON */))
+// Refresh the page
 ```
 
-## 🛠 技术栈
+### Reset
 
-- **HTML5 + CSS3** — 自定义设计系统，无框架依赖
-- **Vanilla JavaScript** (ES6+) — 零依赖
-- **LocalStorage** — 客户端持久化
-- **Service Worker** — PWA 离线缓存
-- **Google Fonts (Nunito)** — 圆润友好字体
+To reset everything to defaults, clear the two localStorage keys (`random_meal_picker_menus` and `random_meal_picker_canteens`) and refresh.
 
-## 🎨 设计
+---
 
-配色灵感来源于「街头美食夜市」——温暖的纸白底色搭配活力珊瑚橙主色调，每个食堂各有独立标识色。核心交互是老虎机式抽选动画，通过快速文字切换 + 减速度曲线模拟真实手感，结果揭晓时配合彩纸粒子效果，让每次选择都像中奖一样有仪式感。
+## 🤝 Contributing
+
+Contributions are welcome! Here's how:
+
+1. **Fork** the repo
+2. **Edit** `index.html` — it's the whole app
+3. **Test** by opening it in a browser (and on mobile if possible)
+4. **Submit a PR** with a clear description of what you changed and why
+
+### Ideas for contributions
+
+- 🌍 **i18n** — translate the UI to other languages
+- 🎨 **More themes** — add alternative color palettes
+- 📊 **History / stats** — track what was picked
+- 🗳️ **Group voting** — let multiple people vote on what to eat
+- 🖼️ **Dish photos** — attach images to menu items
+
+For bugs or feature requests, please [open an issue](https://github.com/noone-sketch/random-meal-picker/issues).
+
+---
 
 ## 📄 License
 
-[MIT](./LICENSE) — 随意使用和修改。
+[MIT](./LICENSE) — use it, modify it, share it. Attribution appreciated but not required.
+
+---
+
+<p align="center">
+  <sub>Made with ❤️ and 🍚 | <a href="https://noone-sketch.github.io/random-meal-picker/">Live Demo</a></sub>
+</p>
