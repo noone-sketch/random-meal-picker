@@ -1,0 +1,61 @@
+name: Build Android APK
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Bubblewrap
+        run: npm install -g @bubblewrap/cli
+
+      - name: Generate signing keystore
+        run: |
+          keytool -genkeypair -v \
+            -keystore android.keystore \
+            -alias android \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass "random-meal-picker" \
+            -keypass "random-meal-picker" \
+            -dname "CN=Random Meal Picker, OU=Dev, O=NooneSketch, C=CN"
+
+      - name: Build APK
+        env:
+          BUBBLEWRAP_KEYSTORE_PASSWORD: "random-meal-picker"
+          BUBBLEWRAP_KEY_PASSWORD: "random-meal-picker"
+        run: bubblewrap build --skipPwaValidation
+
+      - name: Locate APK
+        id: apk
+        run: |
+          APK=$(find . -name "*.apk" -type f | head -1)
+          echo "APK_PATH=${APK}" >> "$GITHUB_OUTPUT"
+          echo "Found APK: ${APK}"
+          ls -lh "${APK}"
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.apk.outputs.APK_PATH }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
