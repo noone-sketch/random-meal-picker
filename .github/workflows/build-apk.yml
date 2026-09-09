@@ -48,7 +48,7 @@ jobs:
         env:
           BUBBLEWRAP_KEYSTORE_PASSWORD: "random-meal-picker"
           BUBBLEWRAP_KEY_PASSWORD: "random-meal-picker"
-        run: bubblewrap build --skipPwaValidation
+        run: yes y | bubblewrap build --skipPwaValidation
 
       - name: Locate APK
         id: apk
