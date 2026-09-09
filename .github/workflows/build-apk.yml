@@ -38,11 +38,17 @@ jobs:
             -keypass "random-meal-picker" \
             -dname "CN=Random Meal Picker, OU=Dev, O=NooneSketch, C=CN"
 
+      - name: Configure Bubblewrap JDK/SDK paths
+        run: |
+          mkdir -p ~/.bubblewrap
+          printf '{"jdkPath":"%s","androidSdkPath":"%s"}\n' "$JAVA_HOME" "$ANDROID_HOME" > ~/.bubblewrap/config.json
+          cat ~/.bubblewrap/config.json
+
       - name: Build APK
         env:
           BUBBLEWRAP_KEYSTORE_PASSWORD: "random-meal-picker"
           BUBBLEWRAP_KEY_PASSWORD: "random-meal-picker"
-        run: printf 'n\nn\nn\n' | bubblewrap build --skipPwaValidation
+        run: bubblewrap build --skipPwaValidation
 
       - name: Locate APK
         id: apk
