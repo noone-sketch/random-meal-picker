@@ -1,9 +1,9 @@
-# 🍚 Random Meal Picker · 随机干饭选择器
+[English](README.md) · [中文](README.zh-CN.md)
+
+# 🍚 Random Meal Picker
 
 <p align="center">
   <strong>Can't decide what to eat? Let luck choose for you! 🎲</strong>
-  <br>
-  <em>今天吃什么？让运气帮你决定！告别选择困难。</em>
 </p>
 
 <p align="center">
@@ -169,7 +169,9 @@ random-meal-picker/
 ├── icon-512x512.png        # PWA app icon (large)
 ├── icon-maskable-512x512.png # PWA maskable icon (adaptive shapes)
 ├── LICENSE
-└── README.md
+├── README.md               # This file (English)
+├── README.zh-CN.md         # 中文版
+└── .gitignore
 ```
 
 Yes, the entire app lives in `index.html`. No build step, no bundler, no package.json — just open and it works.
