@@ -44,11 +44,14 @@ jobs:
           printf '{"jdkPath":"%s","androidSdkPath":"%s"}\n' "$JAVA_HOME" "$ANDROID_HOME" > ~/.bubblewrap/config.json
           cat ~/.bubblewrap/config.json
 
+      - name: Generate project & checksum
+        run: bubblewrap update --skipVersionUpgrade
+
       - name: Build APK
         env:
           BUBBLEWRAP_KEYSTORE_PASSWORD: "random-meal-picker"
           BUBBLEWRAP_KEY_PASSWORD: "random-meal-picker"
-        run: yes y | bubblewrap build --skipPwaValidation
+        run: bubblewrap build --skipPwaValidation
 
       - name: Locate APK
         id: apk
