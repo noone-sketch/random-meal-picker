@@ -22,6 +22,8 @@ A playful, installable PWA that randomly picks your next meal — choose from mu
 
 **[▶️ Try it live](https://noone-sketch.github.io/random-meal-picker/)**
 
+**📥 [Download Android APK](https://github.com/noone-sketch/random-meal-picker/releases/latest)**
+
 ---
 
 ## 📑 Table of Contents
@@ -31,6 +33,7 @@ A playful, installable PWA that randomly picks your next meal — choose from mu
 - [🚀 Getting Started](#-getting-started)
 - [📦 Deploy](#-deploy)
 - [📱 PWA & Mobile Apps](#-pwa--mobile-apps)
+- [📥 Download APK](#-download-apk)
 - [📁 Project Structure](#-project-structure)
 - [🛠 Tech Stack](#-tech-stack)
 - [🎨 Design System](#-design-system)
@@ -155,6 +158,26 @@ npx cap add ios
 # Copy index.html / manifest.json / sw.js into www/
 npx cap open ios   # Requires macOS + Xcode
 ```
+
+---
+
+## 📥 Download APK
+
+Prefer a standalone app file instead of the PWA? Grab the latest APK:
+
+<p align="center">
+  <a href="https://github.com/noone-sketch/random-meal-picker/releases/latest"><img src="https://img.shields.io/badge/Download-APK-FF6B4A?style=for-the-badge" alt="Download APK"></a>
+</p>
+
+> 🔒 The APK is built automatically via GitHub Actions and wraps the PWA in a Trusted Web Activity.
+
+### Install steps (Android)
+
+1. Download the `.apk` from the [latest release](https://github.com/noone-sketch/random-meal-picker/releases/latest).
+2. Open the file and allow **"Install from unknown sources"** when prompted.
+3. Tap the app icon to launch.
+
+> ℹ️ Only Android supports APK installs. iPhone users should use **Add to Home Screen** — see [PWA & Mobile Apps](#-pwa--mobile-apps).
 
 ---
 

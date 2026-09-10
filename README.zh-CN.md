@@ -22,6 +22,8 @@
 
 **[▶️ 在线体验](https://noone-sketch.github.io/random-meal-picker/)**
 
+**📥 [下载安卓 APK](https://github.com/noone-sketch/random-meal-picker/releases/latest)**
+
 ---
 
 ## 📑 目录
@@ -31,6 +33,7 @@
 - [🚀 快速开始](#-快速开始)
 - [📦 部署](#-部署)
 - [📱 PWA 与手机 App](#-pwa-与手机-app)
+- [📥 下载 APK](#-下载-apk)
 - [📁 项目结构](#-项目结构)
 - [🛠 技术栈](#-技术栈)
 - [🎨 设计系统](#-设计系统)
@@ -155,6 +158,26 @@ npx cap add ios
 # 把 index.html / manifest.json / sw.js 复制进 www/
 npx cap open ios   # 需要 macOS + Xcode
 ```
+
+---
+
+## 📥 下载 APK
+
+比起 PWA，更喜欢独立的 App 安装文件？下载最新 APK：
+
+<p align="center">
+  <a href="https://github.com/noone-sketch/random-meal-picker/releases/latest"><img src="https://img.shields.io/badge/Download-APK-FF6B4A?style=for-the-badge" alt="下载 APK"></a>
+</p>
+
+> 🔒 APK 由 GitHub Actions 自动构建，将 PWA 包装成 Trusted Web Activity。
+
+### 安装步骤（安卓）
+
+1. 从[最新 Release](https://github.com/noone-sketch/random-meal-picker/releases/latest)下载 `.apk` 文件。
+2. 打开文件，按提示允许**「安装未知来源应用」**。
+3. 点击应用图标即可启动。
+
+> ℹ️ 只有安卓支持 APK 安装。iPhone 用户请用**添加到主屏幕**——见 [PWA 与手机 App](#-pwa-与手机-app)。
 
 ---
 
