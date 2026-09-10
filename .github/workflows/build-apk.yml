@@ -61,6 +61,7 @@ jobs:
             -re {Path to your existing JDK} { send "$env(JAVA_HOME)\r"; exp_continue }
             -re {install the Android SDK} { send "n\r"; exp_continue }
             -re {Path to your existing Android SDK} { send "$env(ANDROID_HOME)\r"; exp_continue }
+            -re {[Pp]assword} { send "random-meal-picker\r"; exp_continue }
             timeout { puts "EXPECT_TIMEOUT"; exit 1 }
             eof { puts "EXPECT_DONE" }
           }
