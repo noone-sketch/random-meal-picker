@@ -17,10 +17,11 @@ const APP_ASSETS = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return Promise.allSettled(
+      return Promise.all(
         APP_ASSETS.map((url) =>
           cache.add(url).catch((err) => {
             console.warn('SW: failed to cache', url, err);
+            return null; // swallow individual failures (allSettled-compatible)
           })
         )
       );

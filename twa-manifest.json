@@ -16,7 +16,7 @@
     "alias": "android"
   },
   "webManifestUrl": "https://noone-sketch.github.io/random-meal-picker/manifest.json",
-  "fallbackType": "customtabs",
+  "fallbackType": "webview",
   "appVersion": "1.0.0",
   "appVersionCode": 1,
   "enableNotifications": false,
