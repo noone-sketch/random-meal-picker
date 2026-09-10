@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Android APK (Capacitor)
 
 on:
   push:
@@ -25,55 +25,76 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install Bubblewrap
-        run: npm install -g @bubblewrap/cli
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Prepare web assets
+        run: |
+          mkdir -p www
+          cp index.html manifest.json sw.js icon-192x192.png icon-512x512.png icon-maskable-512x512.png www/
+
+      - name: Install Capacitor
+        run: npm install
+
+      - name: Add Android platform
+        run: npx cap add android
+
+      - name: Sync web assets
+        run: npx cap sync android
+
+      - name: Configure Android SDK path
+        run: |
+          echo "sdk.dir=${ANDROID_HOME}" > android/local.properties
 
       - name: Generate signing keystore
         run: |
           keytool -genkeypair -v \
-            -keystore android.keystore \
-            -alias android \
+            -keystore android/app/release.keystore \
+            -alias release \
             -keyalg RSA -keysize 2048 -validity 10000 \
             -storepass "random-meal-picker" \
             -keypass "random-meal-picker" \
             -dname "CN=Random Meal Picker, OU=Dev, O=NooneSketch, C=CN"
 
-      - name: Configure Bubblewrap JDK/SDK paths
+      - name: Configure signing in build.gradle
         run: |
-          mkdir -p ~/.bubblewrap
-          printf '{"jdkPath":"%s","androidSdkPath":"%s"}\n' "$JAVA_HOME" "$ANDROID_HOME" > ~/.bubblewrap/config.json
-          cat ~/.bubblewrap/config.json
-
-      - name: Build APK
-        env:
-          BUBBLEWRAP_KEYSTORE_PASSWORD: "random-meal-picker"
-          BUBBLEWRAP_KEY_PASSWORD: "random-meal-picker"
-        run: |
-          command -v expect >/dev/null 2>&1 || sudo apt-get install -y -qq expect
-          cat > /tmp/bw.expect <<'SCRIPT'
-          set timeout 1800
-          spawn bubblewrap build --skipPwaValidation
-          expect {
-            -re {regenerate your} { send "y\r"; exp_continue }
-            -re {versionName for the new App version} { send "1.0.0\r"; exp_continue }
-            -re {version code for the new app version} { send "1\r"; exp_continue }
-            -re {install the JDK} { send "n\r"; exp_continue }
-            -re {Path to your existing JDK} { send "$env(JAVA_HOME)\r"; exp_continue }
-            -re {install the Android SDK} { send "n\r"; exp_continue }
-            -re {Path to your existing Android SDK} { send "$env(ANDROID_HOME)\r"; exp_continue }
-            -re {[Pp]assword} { send "random-meal-picker\r"; exp_continue }
-            -re {\(Y/n\)} { send "y\r"; exp_continue }
-            -re {\(y/N\)} { send "n\r"; exp_continue }
-            timeout { puts "EXPECT_TIMEOUT"; exit 1 }
-            eof { puts "EXPECT_DONE" }
+          python3 - <<'PY'
+          import re, sys
+          p = 'android/app/build.gradle'
+          s = open(p, encoding='utf-8').read()
+          sc = """    signingConfigs {
+              release {
+                  storeFile file('release.keystore')
+                  storePassword 'random-meal-picker'
+                  keyAlias 'release'
+                  keyPassword 'random-meal-picker'
+              }
           }
-          SCRIPT
-          expect /tmp/bw.expect
+"""
+          s2 = re.sub(r'(\n\s*defaultConfig\s*\{)', '\n' + sc + r'\1', s, count=1)
+          if s2 == s:
+              print('ERROR: defaultConfig block not found'); sys.exit(1)
+          s = s2
+          s2 = re.sub(r'(buildTypes\s*\{[^{}]*?release\s*\{)', r'\1\n            signingConfig signingConfigs.release', s, count=1)
+          if s2 == s:
+              print('ERROR: buildTypes.release block not found'); sys.exit(1)
+          s = s2
+          open(p, 'w', encoding='utf-8').write(s)
+          print('Patched build.gradle successfully')
+PY
+
+      - name: Build release APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon
 
       - name: Locate APK
         id: apk
         run: |
-          APK=$(find . -name "*.apk" -type f | head -1)
+          APK=$(find android/app/build/outputs -name "*.apk" -type f | grep -v -- '-unsigned' | head -1)
           echo "APK_PATH=${APK}" >> "$GITHUB_OUTPUT"
           echo "Found APK: ${APK}"
           ls -lh "${APK}"

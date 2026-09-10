@@ -1,0 +1,8 @@
+{
+  "appId": "com.noonesketch.randommealpicker",
+  "appName": "干饭选择器",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}

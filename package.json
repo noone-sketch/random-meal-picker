@@ -1,0 +1,11 @@
+{
+  "name": "random-meal-picker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "随机干饭选择器 — 本地打包的安卓应用（Capacitor + WebView）",
+  "devDependencies": {
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/cli": "^6.2.0",
+    "@capacitor/core": "^6.2.0"
+  }
+}
