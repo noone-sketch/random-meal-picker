@@ -44,6 +44,31 @@ jobs:
       - name: Sync web assets
         run: npx cap sync android
 
+      - name: Generate app icons
+        run: |
+          pip install --quiet Pillow
+          python3 - <<'PY'
+          from PIL import Image
+          import os
+          src = Image.open('icon-512x512.png').convert('RGBA')
+          base = 'android/app/src/main/res'
+          for d, s in {'mdpi': 48, 'hdpi': 72, 'xhdpi': 96, 'xxhdpi': 144, 'xxxhdpi': 192}.items():
+              folder = f'{base}/mipmap-{d}'
+              os.makedirs(folder, exist_ok=True)
+              img = src.resize((s, s), Image.LANCZOS)
+              img.save(f'{folder}/ic_launcher.png')
+              img.save(f'{folder}/ic_launcher_round.png')
+          for d, s in {'mdpi': 108, 'hdpi': 162, 'xhdpi': 216, 'xxhdpi': 324, 'xxxhdpi': 432}.items():
+              folder = f'{base}/mipmap-{d}'
+              canvas = Image.new('RGBA', (s, s), (0, 0, 0, 0))
+              inner = int(s * 0.66)
+              icon = src.resize((inner, inner), Image.LANCZOS)
+              off = (s - inner) // 2
+              canvas.paste(icon, (off, off), icon)
+              canvas.save(f'{folder}/ic_launcher_foreground.png')
+          print('app icons generated')
+          PY
+
       - name: Configure Android SDK path
         run: |
           echo "sdk.dir=${ANDROID_HOME}" > android/local.properties
