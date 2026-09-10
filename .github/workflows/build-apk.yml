@@ -72,7 +72,7 @@ jobs:
                   keyPassword 'random-meal-picker'
               }
           }
-"""
+          """
           s2 = re.sub(r'(\n\s*defaultConfig\s*\{)', '\n' + sc + r'\1', s, count=1)
           if s2 == s:
               print('ERROR: defaultConfig block not found'); sys.exit(1)
@@ -83,7 +83,7 @@ jobs:
           s = s2
           open(p, 'w', encoding='utf-8').write(s)
           print('Patched build.gradle successfully')
-PY
+          PY
 
       - name: Build release APK
         run: |
