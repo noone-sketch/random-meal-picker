@@ -18,5 +18,18 @@
   "webManifestUrl": "https://noone-sketch.github.io/random-meal-picker/manifest.json",
   "fallbackType": "customtabs",
   "appVersion": "1.0.0",
-  "appVersionCode": 1
+  "appVersionCode": 1,
+  "enableNotifications": false,
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "minSdkVersion": 21,
+  "orientation": "default",
+  "shortcuts": [],
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "fingerprints": []
 }
