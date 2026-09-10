@@ -44,14 +44,28 @@ jobs:
           printf '{"jdkPath":"%s","androidSdkPath":"%s"}\n' "$JAVA_HOME" "$ANDROID_HOME" > ~/.bubblewrap/config.json
           cat ~/.bubblewrap/config.json
 
-      - name: Generate project & checksum
-        run: bubblewrap update --skipVersionUpgrade
-
       - name: Build APK
         env:
           BUBBLEWRAP_KEYSTORE_PASSWORD: "random-meal-picker"
           BUBBLEWRAP_KEY_PASSWORD: "random-meal-picker"
-        run: bubblewrap build --skipPwaValidation
+        run: |
+          command -v expect >/dev/null 2>&1 || sudo apt-get install -y -qq expect
+          cat > /tmp/bw.expect <<'SCRIPT'
+          set timeout 1800
+          spawn bubblewrap build --skipPwaValidation
+          expect {
+            -re {regenerate your project} { send "y\r"; exp_continue }
+            -re {versionName for the new App version} { send "1.0.0\r"; exp_continue }
+            -re {version code for the new app version} { send "1\r"; exp_continue }
+            -re {install the JDK} { send "n\r"; exp_continue }
+            -re {Path to your existing JDK} { send "$env(JAVA_HOME)\r"; exp_continue }
+            -re {install the Android SDK} { send "n\r"; exp_continue }
+            -re {Path to your existing Android SDK} { send "$env(ANDROID_HOME)\r"; exp_continue }
+            timeout { puts "EXPECT_TIMEOUT"; exit 1 }
+            eof { puts "EXPECT_DONE" }
+          }
+          SCRIPT
+          expect /tmp/bw.expect
 
       - name: Locate APK
         id: apk
