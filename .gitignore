@@ -1,2 +1,6 @@
 # 本地工具脚本（仅本机使用，不上传到 GitHub）
 push.ps1
+
+# 签名密钥（本地生成，存 GitHub Secret，不上传）
+android-release.keystore
+.keystore.b64
