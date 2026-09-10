@@ -54,7 +54,7 @@ jobs:
           set timeout 1800
           spawn bubblewrap build --skipPwaValidation
           expect {
-            -re {regenerate your project} { send "y\r"; exp_continue }
+            -re {regenerate your} { send "y\r"; exp_continue }
             -re {versionName for the new App version} { send "1.0.0\r"; exp_continue }
             -re {version code for the new app version} { send "1\r"; exp_continue }
             -re {install the JDK} { send "n\r"; exp_continue }
@@ -62,6 +62,8 @@ jobs:
             -re {install the Android SDK} { send "n\r"; exp_continue }
             -re {Path to your existing Android SDK} { send "$env(ANDROID_HOME)\r"; exp_continue }
             -re {[Pp]assword} { send "random-meal-picker\r"; exp_continue }
+            -re {\(Y/n\)} { send "y\r"; exp_continue }
+            -re {\(y/N\)} { send "n\r"; exp_continue }
             timeout { puts "EXPECT_TIMEOUT"; exit 1 }
             eof { puts "EXPECT_DONE" }
           }
